@@ -2116,32 +2116,115 @@ function recheck(serial) {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('[SW] 등록 완료:', reg.scope))
+      .then(reg => {
+        console.log('[SW] 등록 완료:', reg.scope);
+        // 새 SW가 설치될 때 캐싱 완료 표시
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'activated') {
+              showCacheToast('✅ 오프라인 캐싱 완료! 이제 어디서든 사용 가능');
+            }
+          });
+        });
+        // 이미 활성화된 경우
+        if (reg.active) {
+          console.log('[SW] 이미 활성화됨 — 캐시 사용 가능');
+        }
+      })
       .catch(err => console.warn('[SW] 등록 실패:', err));
   });
 }
 
-// ========== iOS PWA 설치 안내 배너 ==========
-(function() {
-  // iOS Safari인지 확인 (standalone이 아닌 경우 = 아직 홈화면 추가 안 함)
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isStandalone = window.navigator.standalone === true;
-  const dismissed = sessionStorage.getItem('pwa-banner-dismissed');
+function showCacheToast(msg) {
+  const toast = document.createElement('div');
+  toast.textContent = msg;
+  Object.assign(toast.style, {
+    position: 'fixed', top: '60px', left: '50%', transform: 'translateX(-50%)',
+    background: '#059669', color: '#fff', padding: '10px 20px', borderRadius: '8px',
+    fontSize: '13px', fontWeight: '600', zIndex: '10001', textAlign: 'center',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.2)', animation: 'slideDown 0.3s ease',
+    whiteSpace: 'nowrap'
+  });
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.5s'; }, 3000);
+  setTimeout(() => toast.remove(), 3500);
+}
 
-  if (isIOS && !isStandalone && !dismissed) {
-    // 약간 딜레이 후 배너 표시
-    setTimeout(() => {
-      const banner = document.createElement('div');
-      banner.id = 'pwaBanner';
+// ========== PWA 설치 안내 (iOS + Android) ==========
+let deferredInstallPrompt = null;
+
+// Android Chrome: beforeinstallprompt 이벤트 캡처
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallBanner('android');
+});
+
+// 이미 설치된 경우 감지
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  showCacheToast('✅ 앱이 설치되었습니다!');
+});
+
+function showInstallBanner(platform) {
+  const dismissed = sessionStorage.getItem('pwa-banner-dismissed');
+  if (dismissed) return;
+
+  // 이미 standalone으로 실행 중이면 표시 안 함
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return;
+
+  setTimeout(() => {
+    const banner = document.createElement('div');
+    banner.id = 'pwaBanner';
+
+    if (platform === 'android') {
       banner.innerHTML = `
         <div style="
           position:fixed; bottom:0; left:0; right:0; z-index:10000;
+          background:#fff; border-top:2px solid #0096D6;
+          padding:16px 20px; padding-bottom:16px;
+          box-shadow:0 -2px 12px rgba(0,0,0,0.12);
+          display:flex; align-items:center; gap:12px;
+          font-family:-apple-system,sans-serif;
+          animation: slideUp 0.3s ease;
+        ">
+          <img src="icon-192.png" style="width:48px;height:48px;border-radius:12px;" alt="앱 아이콘">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:700;color:#1a1a2e;">앱으로 설치하기</div>
+            <div style="font-size:12px;color:#6b7280;margin-top:2px;">홈 화면에 추가하면 앱처럼 사용 가능</div>
+          </div>
+          <button id="pwaInstallBtn" style="
+            background:#0096D6;color:#fff;border:none;border-radius:8px;
+            padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;
+          ">설치</button>
+          <button onclick="document.getElementById('pwaBanner').remove();sessionStorage.setItem('pwa-banner-dismissed','1');" 
+                  style="background:none;border:none;font-size:18px;color:#9ca3af;padding:4px;cursor:pointer;">✕</button>
+        </div>
+      `;
+      document.body.appendChild(banner);
+      document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const result = await deferredInstallPrompt.userChoice;
+          if (result.outcome === 'accepted') {
+            banner.remove();
+          }
+          deferredInstallPrompt = null;
+        }
+      });
+    } else {
+      // iOS Safari
+      banner.innerHTML = `
+        <div style="
+          position:fixed; bottom:0; left:0; right:0; z:10000;
           background:#fff; border-top:2px solid #0096D6;
           padding:16px 20px; padding-bottom:calc(env(safe-area-inset-bottom,16px) + 8px);
           box-shadow:0 -2px 12px rgba(0,0,0,0.12);
           display:flex; align-items:center; gap:12px;
           font-family:-apple-system,sans-serif;
           animation: slideUp 0.3s ease;
+          z-index:10000;
         ">
           <img src="icon-192.png" style="width:48px;height:48px;border-radius:12px;" alt="앱 아이콘">
           <div style="flex:1;">
@@ -2157,7 +2240,16 @@ if ('serviceWorker' in navigator) {
         </div>
       `;
       document.body.appendChild(banner);
-    }, 2000);
+    }
+  }, 2000);
+}
+
+// iOS 감지 — beforeinstallprompt가 안 뜨는 경우
+(function() {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  if (isIOS && !isStandalone) {
+    showInstallBanner('ios');
   }
 })();
 </script>
@@ -2166,6 +2258,10 @@ if ('serviceWorker' in navigator) {
   @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
+  }
+  @keyframes slideDown {
+    from { transform: translate(-50%, -20px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
   }
 </style>
 
