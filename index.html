@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="HP Serial">
+<meta name="theme-color" content="#0096D6">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>HP 시리얼 생산일자 조회</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+    background: #f4f4f4;
+    color: #2d2d2d;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 상단 헤더 바 */
+  .top-bar {
+    width: 100%;
+    background: #0096D6;
+    padding: 14px 20px;
+    padding-top: calc(env(safe-area-inset-top, 14px) + 6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .top-bar .logo {
+    width: 32px;
+    height: 32px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    color: #0096D6;
+    flex-shrink: 0;
+  }
+  .top-bar .title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.3px;
+  }
+
+  /* 메인 컨텐츠 */
+  .content {
+    width: 100%;
+    max-width: 540px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+    text-align: center;
+    margin-bottom: 2px;
+  }
+  .page-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  /* 입력 영역 카드 */
+  .input-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .camera-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #0096D6;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .camera-btn:active { background: #007ab8; transform: scale(0.98); }
+  .camera-btn .icon { font-size: 20px; }
+
+  .gallery-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #fff;
+    color: #0096D6;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 15px;
+    border: 2px solid #0096D6;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .gallery-btn:active { background: #e8f6fc; transform: scale(0.98); }
+  .gallery-btn .icon { font-size: 20px; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #b0b0b0;
+    font-size: 12px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  .manual-row {
+    display: flex;
+    gap: 8px;
+  }
+  .manual-input {
+    flex: 1;
+    background: #f9fafb;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 16px;
+    color: #1a1a2e;
+    outline: none;
+    font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
+    letter-spacing: 1px;
+  }
+  .manual-input::placeholder { color: #9ca3af; }
+  .manual-input:focus { border-color: #0096D6; box-shadow: 0 0 0 3px rgba(0,150,214,0.12); }
+
+  .check-btn {
+    background: #0096D6;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .check-btn:active { background: #007ab8; }
+
+  /* OCR 상태 */
+  .ocr-status {
+    text-align: center;
+    font-size: 13px;
+    color: #6b7280;
+    min-height: 20px;
+  }
+
+  /* 날짜코드 3자리 입력 영역 */
+  .datecode-section {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    animation: fadeIn 0.2s ease;
+  }
+  .datecode-section.active { display: flex; }
+
+  .datecode-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: none;
+    border: 1.5px dashed #0096D6;
+    border-radius: 8px;
+    padding: 10px;
+    color: #0096D6;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .datecode-toggle:active { background: #e8f6fc; }
+  .datecode-toggle.open {
+    border-style: solid;
+    background: #e8f6fc;
+  }
+
+  .datecode-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .datecode-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    min-width: 28px;
+    text-align: center;
+  }
+  .datecode-input {
+    width: 42px;
+    height: 42px;
+    background: #f9fafb;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
+    color: #1a1a2e;
+    outline: none;
+    text-transform: uppercase;
+  }
+  .datecode-input:focus {
+    border-color: #0096D6;
+    box-shadow: 0 0 0 3px rgba(0,150,214,0.12);
+  }
+  .datecode-input::placeholder {
+    color: #d1d5db;
+    font-weight: 400;
+    font-size: 14px;
+  }
+  .datecode-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    text-align: center;
+    margin-top: -2px;
+  }
+  .datecode-check-btn {
+    flex: 1;
+    background: #0096D6;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 10px 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .datecode-check-btn:active { background: #007ab8; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 결과 카드 */
+  .result-card {
+    width: 100%;
+    max-width: 540px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    overflow: hidden;
+    display: none;
+    margin: 0 16px;
+  }
+  .result-card.show { display: block; }
+
+  .result-header {
+    background: #0096D6;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .result-header .badge {
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .result-header .serial-text {
+    font-family: 'SF Mono', monospace;
+    font-size: 13px;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0.8px;
+    word-break: break-all;
+  }
+
+  /* 큰 날짜 */
+  .date-display {
+    padding: 28px 18px;
+    text-align: center;
+    background: #f0fdf4;
+  }
+  .date-display .label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+  .date-display .date {
+    font-size: 46px;
+    font-weight: 800;
+    color: #059669;
+    letter-spacing: 2px;
+    line-height: 1.2;
+  }
+  .date-display .date-sub {
+    font-size: 15px;
+    color: #10b981;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  /* 파싱 근거 */
+  .detail-section {
+    padding: 16px 18px;
+    border-top: 1px solid #f0f0f0;
+  }
+  .detail-title {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row .key {
+    font-size: 13px;
+    color: #6b7280;
+  }
+  .detail-row .val {
+    font-size: 13px;
+    font-family: 'SF Mono', monospace;
+    color: #1a1a2e;
+  }
+  .detail-row .highlight {
+    color: #0096D6;
+    font-weight: 700;
+  }
+
+  /* 에러 */
+  .error-msg {
+    text-align: center;
+    color: #dc2626;
+    font-size: 14px;
+    padding: 24px 18px;
+    background: #fef2f2;
+  }
+
+  /* 히스토리 */
+  .history-section {
+    width: 100%;
+    max-width: 540px;
+    padding: 0 16px;
+    margin-top: 4px;
+  }
+  .history-title {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-bottom: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #fff;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .history-item:active { background: #f0f9ff; }
+  .history-item .h-serial {
+    font-family: 'SF Mono', monospace;
+    font-size: 12px;
+    color: #6b7280;
+    letter-spacing: 0.5px;
+  }
+  .history-item .h-date {
+    font-size: 14px;
+    font-weight: 700;
+    color: #059669;
+  }
+
+  /* 숨긴 file input */
+  #cameraInput, #galleryInput { display: none; }
+
+  /* canvas for OCR */
+  #ocrCanvas { display: none; }
+
+  /* ====== 카메라 가이드라인 오버레이 ====== */
+  .camera-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    background: #000;
+    display: none;
+    flex-direction: column;
+  }
+  .camera-overlay.active { display: flex; }
+
+  .camera-overlay video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .camera-guide-layer {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+  }
+
+  /* 가이드 박스 위아래 어두운 영역 */
+  .guide-mask-top, .guide-mask-bottom {
+    position: absolute;
+    left: 0; right: 0;
+    background: rgba(0,0,0,0.55);
+  }
+  .guide-mask-top { top: 0; }
+  .guide-mask-bottom { bottom: 0; }
+  .guide-mask-left, .guide-mask-right {
+    position: absolute;
+    background: rgba(0,0,0,0.55);
+  }
+
+  /* 가이드 박스 — 가로로 긴 직사각형 (시리얼 번호 맞춤) */
+  .guide-box {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 2.5px solid #0096D6;
+    border-radius: 10px;
+    box-shadow: 0 0 0 4000px rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 가이드 박스 중앙선 (수평 정렬 도우미) */
+  .guide-box .guide-centerline {
+    position: absolute;
+    left: 8px; right: 8px;
+    top: 50%;
+    height: 1px;
+    background: rgba(0,150,214,0.35);
+    pointer-events: none;
+  }
+
+  /* 가이드 박스 안 텍스트 힌트 */
+  .guide-box .guide-inner-text {
+    color: rgba(255,255,255,0.45);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-align: center;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  /* 가이드 박스 코너 장식 — 더 길게 */
+  .guide-box::before, .guide-box::after {
+    content: '';
+    position: absolute;
+    width: 28px;
+    height: 20px;
+    border: 3px solid #fff;
+  }
+  .guide-box::before {
+    top: -2px; left: -2px;
+    border-right: none; border-bottom: none;
+    border-radius: 8px 0 0 0;
+  }
+  .guide-box::after {
+    top: -2px; right: -2px;
+    border-left: none; border-bottom: none;
+    border-radius: 0 8px 0 0;
+  }
+
+  .guide-corner-bl, .guide-corner-br {
+    position: absolute;
+    width: 28px;
+    height: 20px;
+    border: 3px solid #fff;
+  }
+  .guide-corner-bl {
+    bottom: -2px; left: -2px;
+    border-right: none; border-top: none;
+    border-radius: 0 0 0 8px;
+  }
+  .guide-corner-br {
+    bottom: -2px; right: -2px;
+    border-left: none; border-top: none;
+    border-radius: 0 0 8px 0;
+  }
+
+  /* 가이드 텍스트 */
+  .guide-text-top {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(50% + 45px);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+    white-space: nowrap;
+  }
+  .guide-text-hint {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(50% + 45px);
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    text-align: center;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    white-space: nowrap;
+  }
+
+  /* 촬영 버튼 영역 */
+  .camera-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    padding: 20px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    pointer-events: auto;
+  }
+
+  .shutter-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #fff;
+    border: 4px solid rgba(255,255,255,0.4);
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s;
+    pointer-events: auto;
+  }
+  .shutter-btn:active {
+    transform: scale(0.92);
+    background: #ddd;
+  }
+  .shutter-btn::after {
+    content: '';
+    position: absolute;
+    top: 4px; left: 4px; right: 4px; bottom: 4px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.1);
+  }
+
+  .close-camera-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  .close-camera-btn:active { background: rgba(255,255,255,0.35); }
+
+  /* 플래시 효과 */
+  .flash-effect {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s;
+  }
+  .flash-effect.flash { opacity: 0.8; }
+
+  /* 하단 여백 */
+  .bottom-spacer { height: 40px; }
+
+  /* ====== 참조표 보기 버튼 & 패널 ====== */
+  .ref-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    background: #fff;
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .ref-toggle-btn:active { background: #f0f9ff; border-color: #0096D6; color: #0096D6; }
+  .ref-toggle-btn .arrow {
+    transition: transform 0.2s;
+    font-size: 12px;
+  }
+  .ref-toggle-btn.open .arrow { transform: rotate(180deg); }
+  .ref-toggle-btn.open { border-color: #0096D6; color: #0096D6; background: #f0f9ff; }
+
+  .ref-panel {
+    width: 100%;
+    max-width: 540px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+    padding: 0 16px;
+  }
+  .ref-panel.open {
+    max-height: 800px;
+    opacity: 1;
+    padding: 16px;
+  }
+
+  /* 하단 푸터 */
+  .footer {
+    width: 100%;
+    text-align: center;
+    padding: 16px 0 24px;
+    font-size: 11px;
+    color: #b0b0b0;
+    letter-spacing: 0.5px;
+  }
+  .footer span {
+    color: #9ca3af;
+    font-weight: 600;
+  }
+
+  /* ====== 애매한 문자 선택 UI ====== */
+  .char-picker-section {
+    padding: 16px 18px;
+    border-top: 1px solid #f0f0f0;
+    background: #fffbeb;
+  }
+  .char-picker-title {
+    font-size: 12px;
+    color: #b45309;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .char-picker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .char-picker-row:last-child { border-bottom: none; }
+  .char-picker-label {
+    font-size: 13px;
+    color: #6b7280;
+    flex-shrink: 0;
+    width: 70px;
+  }
+  .char-picker-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .char-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 52px;
+    height: 34px;
+    padding: 0 8px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    font-family: 'SF Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .char-option:active { transform: scale(0.95); }
+  .char-option.selected {
+    background: #0096D6;
+    color: #fff;
+    border-color: #0096D6;
+    box-shadow: 0 2px 6px rgba(0,150,214,0.3);
+  }
+  .char-option.ocr-original {
+    border-color: #0096D6;
+    color: #0096D6;
+  }
+  .char-option.ocr-original.selected {
+    background: #0096D6;
+    color: #fff;
+  }
+  .char-option .char-code {
+    font-weight: 800;
+    margin-right: 3px;
+  }
+  .char-option .char-decoded {
+    font-size: 11px;
+    opacity: 0.8;
+    font-weight: 400;
+  }
+
+  /* ====== 코드 참조표 ====== */
+  .ref-table-section {
+    padding: 14px 18px;
+    border-top: 1px solid #f0f0f0;
+    background: #f9fafb;
+  }
+  .ref-table-title {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+  .ref-table th {
+    background: #e5e7eb;
+    color: #6b7280;
+    font-weight: 600;
+    padding: 4px 3px;
+    text-align: center;
+    border: 1px solid #d1d5db;
+    white-space: nowrap;
+  }
+  .ref-table td {
+    padding: 4px 3px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+    font-family: 'SF Mono', monospace;
+    color: #374151;
+    white-space: nowrap;
+  }
+  .ref-table .code-highlight {
+    font-weight: 800;
+    color: #0096D6;
+  }
+  .ref-table tr.current-highlight td {
+    background: #e0f2fe;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">hp</div>
+  <span class="title">시리얼 생산일자 조회</span>
+</div>
+
+<div class="content">
+  <p class="page-title">생산일자 확인</p>
+  <p class="page-subtitle">시리얼 번호를 촬영하거나 직접 입력하세요</p>
+
+  <div class="input-card">
+    <button class="camera-btn" onclick="openCamera()">
+      <span class="icon">📷</span>
+      <span>카메라로 촬영</span>
+    </button>
+
+    <button class="gallery-btn" onclick="openGallery()">
+      <span class="icon">🖼️</span>
+      <span>사진첩에서 선택</span>
+    </button>
+
+    <div class="divider">또는 직접 입력</div>
+
+    <div class="manual-row">
+      <input type="text" class="manual-input" id="serialInput"
+             placeholder="시리얼 번호 입력 (CN...)" maxlength="25"
+             autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      <button class="check-btn" onclick="checkSerial()">조회</button>
+    </div>
+
+    <div class="ocr-status" id="ocrStatus"></div>
+
+    <div class="divider">또는 날짜코드만 입력</div>
+
+    <button class="datecode-toggle" id="datecodeToggle" onclick="toggleDatecodeInput()">
+      🔤 연·월·일 코드 3자리만 입력
+    </button>
+
+    <div class="datecode-section" id="datecodeSection">
+      <div class="datecode-row" style="justify-content:center;gap:10px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <span class="datecode-label">Y</span>
+          <input type="text" class="datecode-input" id="dcYear" maxlength="1" placeholder="Y"
+                 autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                 oninput="datecodeAutoNext(this,'dcMonth')">
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <span class="datecode-label">M</span>
+          <input type="text" class="datecode-input" id="dcMonth" maxlength="1" placeholder="M"
+                 autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                 oninput="datecodeAutoNext(this,'dcDay')">
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <span class="datecode-label">D</span>
+          <input type="text" class="datecode-input" id="dcDay" maxlength="1" placeholder="D"
+                 autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                 oninput="datecodeAutoNext(this,null)">
+        </div>
+        <button class="datecode-check-btn" style="flex:0 0 auto;padding:10px 18px;height:42px;align-self:flex-end;" onclick="checkDatecode()">조회</button>
+      </div>
+      <div class="datecode-hint">시리얼의 연도·월·일 코드 문자를 각각 1자씩 입력</div>
+    </div>
+  </div>
+
+  <!-- 참조표 보기 버튼 -->
+  <button class="ref-toggle-btn" id="refToggleBtn" onclick="toggleRefPanel()">
+    <span>📊</span>
+    <span>시리얼 코드 참조표 보기</span>
+    <span class="arrow">▼</span>
+  </button>
+</div>
+
+<!-- 참조표 패널 (토글) -->
+<div class="ref-panel" id="refPanel">
+  <div style="margin-bottom:14px; font-size:13px; color:#374151; line-height:1.7;">
+    <div style="font-weight:700; color:#1a1a2e; margin-bottom:6px;">📌 시리얼 번호에서 날짜 위치</div>
+    <div>• 10자리: CN XX <b style="color:#0096D6;text-decoration:underline;">Y M D</b> XXX &nbsp;→ <b>5·6·7</b>번째</div>
+    <div>• 25자리: CN XXXXXXXXXXXXXXXX <b style="color:#0096D6;text-decoration:underline;">Y M D</b> XXXX &nbsp;→ <b>19·20·21</b>번째</div>
+    <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Y=연도, M=월, D=일</div>
+  </div>
+  <div class="ref-table-title">📅 연도 코드표 (2011~2040)</div>
+  <table class="ref-table">
+    <tr>
+      <th>연도</th><th>'11</th><th>'12</th><th>'13</th><th>'14</th><th>'15</th><th>'16</th><th>'17</th><th>'18</th><th>'19</th><th>'20</th>
+    </tr>
+    <tr>
+      <th>코드</th><td>C</td><td>D</td><td>F</td><td>G</td><td>H</td><td>J</td><td>K</td><td>L</td><td>M</td><td>N</td>
+    </tr>
+    <tr>
+      <th>연도</th><th>'21</th><th>'22</th><th>'23</th><th>'24</th><th>'25</th><th>'26</th><th>'27</th><th>'28</th><th>'29</th><th>'30</th>
+    </tr>
+    <tr>
+      <th>코드</th><td>R</td><td>T</td><td>W</td><td>X</td><td>Y</td><td>L</td><td>P</td><td>Q</td><td>S</td><td>Z</td>
+    </tr>
+    <tr>
+      <th>연도</th><th>'31</th><th>'32</th><th>'33</th><th>'34</th><th>'35</th><th>'36</th><th>'37</th><th>'38</th><th>'39</th><th>'40</th>
+    </tr>
+    <tr>
+      <th>코드</th><td>B</td><td>C</td><td>D</td><td>F</td><td>G</td><td>H</td><td>J</td><td>K</td><td>M</td><td>N</td>
+    </tr>
+  </table>
+
+  <div class="ref-table-title" style="margin-top:12px;">📆 월 코드표</div>
+  <table class="ref-table">
+    <tr>
+      <th>월</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
+    </tr>
+    <tr>
+      <th>코드</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>B</td><td>C</td><td>D</td>
+    </tr>
+  </table>
+
+  <div class="ref-table-title" style="margin-top:12px;">📋 일 코드표 (1~31)</div>
+  <table class="ref-table">
+    <tr>
+      <th>일</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th>
+    </tr>
+    <tr>
+      <th>코드</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td><td>D</td><td>F</td><td>G</td><td>H</td>
+    </tr>
+    <tr>
+      <th>일</th><th>17</th><th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th><th>24</th><th>25</th><th>26</th><th>27</th><th>28</th><th>29</th><th>30</th><th>31</th><th></th>
+    </tr>
+    <tr>
+      <th>코드</th><td>J</td><td>K</td><td>L</td><td>M</td><td>N</td><td>P</td><td>Q</td><td>R</td><td>S</td><td>T</td><td>V</td><td>W</td><td>X</td><td>Y</td><td>Z</td><td></td>
+    </tr>
+  </table>
+</div>
+
+<input type="file" id="cameraInput" accept="image/*" capture="environment">
+<input type="file" id="galleryInput" accept="image/*">
+<canvas id="ocrCanvas"></canvas>
+
+<!-- 카메라 가이드라인 오버레이 -->
+<div class="camera-overlay" id="cameraOverlay">
+  <video id="cameraVideo" playsinline autoplay muted></video>
+  <div class="camera-guide-layer">
+    <!-- 가이드 박스 — JS에서 크기 설정 -->
+    <div class="guide-box" id="guideBox">
+      <div class="guide-centerline"></div>
+      <div class="guide-inner-text">CN XXXXXXXXXX</div>
+      <div class="guide-corner-bl"></div>
+      <div class="guide-corner-br"></div>
+    </div>
+    <div class="guide-text-top" id="guideTextTop">시리얼 번호를 박스 안에 맞춰주세요</div>
+    <div class="guide-text-hint" id="guideTextHint">📏 가로로 수평 · 박스에 꽉 차게 · 흔들리지 않게</div>
+    <div class="flash-effect" id="flashEffect"></div>
+  </div>
+  <div class="camera-controls">
+    <button class="close-camera-btn" onclick="closeCamera()">✕</button>
+    <button class="shutter-btn" id="shutterBtn" onclick="capturePhoto()"></button>
+    <div style="width:44px"></div><!-- 좌우 균형 맞춤 -->
+  </div>
+</div>
+
+<div class="result-card" id="resultCard"></div>
+
+<div class="history-section" id="historySection">
+  <div class="history-title">📋 최근 조회</div>
+  <div id="historyList"></div>
+</div>
+
+<div class="bottom-spacer"></div>
+<div class="footer">Made by <span>KSH</span></div>
+
+<!-- Tesseract.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script>
+// ========== 코딩 테이블 ==========
+// 연도 코드: 같은 문자가 10년 주기로 반복됨
+// 2021~2030 우선 적용 (현재 시점 기준), 매칭 안 되면 2031~2040, 2010~2020 순
+const YEAR_CYCLE_1 = { // 2021~2030
+  'R': 2021, 'T': 2022, 'W': 2023, 'X': 2024, 'Y': 2025,
+  'L': 2026, 'P': 2027, 'Q': 2028, 'S': 2029, 'Z': 2030
+};
+const YEAR_CYCLE_2 = { // 2031~2040
+  'B': 2031, 'C': 2032, 'D': 2033, 'F': 2034, 'G': 2035,
+  'H': 2036, 'J': 2037, 'K': 2038, 'M': 2039, 'N': 2040
+};
+const YEAR_CYCLE_0 = { // 2010~2020
+  'B': 2010, 'C': 2011, 'D': 2012, 'F': 2013, 'G': 2014,
+  'H': 2015, 'J': 2016, 'K': 2017, 'L': 2018, 'M': 2019, 'N': 2020
+};
+
+function decodeYear(ch) {
+  // 우선순위: 2021~2030 → 2031~2040 → 2010~2020
+  if (YEAR_CYCLE_1[ch]) return YEAR_CYCLE_1[ch];
+  if (YEAR_CYCLE_2[ch]) return YEAR_CYCLE_2[ch];
+  if (YEAR_CYCLE_0[ch]) return YEAR_CYCLE_0[ch];
+  return null;
+}
+
+const MONTH_CODE = {
+  '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
+  '7': 7, '8': 8, '9': 9, 'B': 10, 'C': 11, 'D': 12
+};
+
+// Day 코드: 사진 테이블 기준 (10=A 포함, E/I/O/U 제외)
+// 1~9 → 1~9, 10=A, 11=B, 12=C, 13=D, 14=F, 15=G, 16=H, 17=J, 18=K,
+// 19=L, 20=M, 21=N, 22=P, 23=Q, 24=R, 25=S, 26=T, 27=V, 28=W, 29=X, 30=Y, 31=Z
+const DAY_CODE_V2 = {
+  '1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,
+  'A':10, 'B':11, 'C':12, 'D':13, 'F':14, 'G':15, 'H':16, 'J':17,
+  'K':18, 'L':19, 'M':20, 'N':21, 'P':22, 'Q':23, 'R':24, 'S':25,
+  'T':26, 'V':27, 'W':28, 'X':29, 'Y':30, 'Z':31
+};
+
+const MONTH_NAMES = ['', '1월', '2월', '3월', '4월', '5월', '6월',
+                     '7월', '8월', '9월', '10월', '11월', '12월'];
+
+// ========== 파싱 함수 ==========
+function parseSerial(raw) {
+  const s = raw.replace(/[\s\-]/g, '').toUpperCase();
+  const len = s.length;
+
+  if (len !== 10 && len !== 25) {
+    return { error: true, msg: `시리얼은 10자리 또는 25자리여야 합니다. (입력: ${len}자리)` };
+  }
+
+  let yearChar, monthChar, dayChar;
+  let serialType;
+
+  if (len === 10) {
+    serialType = '10자리';
+    yearChar = s[4];   // 5번째
+    monthChar = s[5];  // 6번째
+    dayChar = s[6];    // 7번째
+  } else {
+    serialType = '25자리';
+    yearChar = s[18];  // 19번째
+    monthChar = s[19]; // 20번째
+    dayChar = s[20];   // 21번째
+  }
+
+  const year = decodeYear(yearChar);
+  const month = MONTH_CODE[monthChar];
+  const day = DAY_CODE_V2[dayChar];
+
+  if (!year) {
+    return { error: true, msg: `연도 코드 '${yearChar}' 를 인식할 수 없습니다.` };
+  }
+  if (!month) {
+    return { error: true, msg: `월 코드 '${monthChar}' 를 인식할 수 없습니다.` };
+  }
+  if (!day) {
+    return { error: true, msg: `일 코드 '${dayChar}' 를 인식할 수 없습니다.` };
+  }
+
+  const dateStr = `${year}.${String(month).padStart(2,'0')}.${String(day).padStart(2,'0')}`;
+  const dayOfWeek = getDayOfWeek(year, month, day);
+
+  return {
+    error: false,
+    serial: s,
+    serialType,
+    year, month, day,
+    yearChar, monthChar, dayChar,
+    dateStr,
+    dayOfWeek,
+    monthName: MONTH_NAMES[month]
+  };
+}
+
+function getDayOfWeek(y, m, d) {
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  const date = new Date(y, m - 1, d);
+  return days[date.getDay()] + '요일';
+}
+
+// ========== UI ==========
+
+// OCR 인식 시 혼동하기 쉬운 유사 문자 그룹
+const SIMILAR_CHARS = {
+  'R': ['R','P','B','K'],
+  'T': ['T','Y','7','F','I'],
+  'W': ['W','M','N'],
+  'X': ['X','K','Y'],
+  'Y': ['Y','T','V','X'],
+  'L': ['L','I','1','J'],
+  'P': ['P','R','D','B'],
+  'Q': ['Q','O','0','G','9'],
+  'S': ['S','5','8','Z'],
+  'Z': ['Z','2','S','7'],
+  'B': ['B','8','D','R','P'],
+  'C': ['C','G','O','0','('],
+  'D': ['D','0','O','B','P'],
+  'F': ['F','P','E','T'],
+  'G': ['G','6','C','O','Q'],
+  'H': ['H','N','M','K'],
+  'J': ['J','I','1','T','L'],
+  'K': ['K','X','R','H'],
+  'M': ['M','N','W','H'],
+  'N': ['N','M','H','W'],
+  '1': ['1','I','L','7','T'],
+  '2': ['2','Z','7'],
+  '3': ['3','8','B'],
+  '4': ['4','A','9'],
+  '5': ['5','S','6'],
+  '6': ['6','G','8','5'],
+  '7': ['7','T','1','Z'],
+  '8': ['8','B','3','S'],
+  '9': ['9','Q','G','4'],
+  'A': ['A','4','H','R'],
+  'V': ['V','U','Y','W'],
+  'I': ['I','1','L','T','J'],
+  'O': ['O','0','Q','D','C'],
+  '0': ['0','O','D','Q'],
+};
+
+// 특정 코드 유형에 대한 유효 문자만 필터링
+function getCandidates(ch, type) {
+  const similar = SIMILAR_CHARS[ch] || [ch];
+  // ch 자체 + 유사 문자를 합치되 중복 제거
+  const allCandidates = [ch, ...similar.filter(c => c !== ch)];
+
+  if (type === 'year') {
+    // 연도 코드에 유효한 문자만
+    const allYears = { ...YEAR_CYCLE_1, ...YEAR_CYCLE_2, ...YEAR_CYCLE_0 };
+    return allCandidates.filter(c => allYears[c]);
+  } else if (type === 'month') {
+    return allCandidates.filter(c => MONTH_CODE[c]);
+  } else if (type === 'day') {
+    return allCandidates.filter(c => DAY_CODE_V2[c]);
+  }
+  return allCandidates;
+}
+
+// 현재 결과 상태 (사용자 보정에 사용)
+let currentResultState = null;
+
+function showResult(result, isFromOCR = false) {
+  const card = document.getElementById('resultCard');
+
+  if (result.error) {
+    card.innerHTML = `<div class="error-msg">❌ ${result.msg}</div>`;
+    card.classList.add('show');
+    return;
+  }
+
+  // 상태 저장
+  currentResultState = { ...result, isFromOCR };
+
+  // 시리얼에서 날짜 부분 하이라이트
+  let serialHtml = '';
+  const s = result.serial;
+  if (result.serialType === '코드 3자리') {
+    serialHtml = `<span style="color:#fff;font-weight:700;text-decoration:underline">${s}</span>`;
+  } else if (result.serialType === '10자리') {
+    serialHtml = `${s.slice(0,4)}<span style="color:#fff;font-weight:700;text-decoration:underline">${s.slice(4,7)}</span>${s.slice(7)}`;
+  } else {
+    serialHtml = `${s.slice(0,18)}<span style="color:#fff;font-weight:700;text-decoration:underline">${s.slice(18,21)}</span>${s.slice(21)}`;
+  }
+
+  // 유사 문자 후보 생성
+  const yearCandidates = getCandidates(result.yearChar, 'year');
+  const monthCandidates = getCandidates(result.monthChar, 'month');
+  const dayCandidates = getCandidates(result.dayChar, 'day');
+
+  // 후보가 2개 이상인 코드가 있으면 선택 UI 표시
+  const hasAmbiguity = isFromOCR && (yearCandidates.length > 1 || monthCandidates.length > 1 || dayCandidates.length > 1);
+
+  // 연도 후보 옵션 HTML
+  function makeOptions(candidates, currentChar, type) {
+    return candidates.map(c => {
+      let decoded = '';
+      if (type === 'year') decoded = decodeYear(c) + '년';
+      else if (type === 'month') decoded = MONTH_CODE[c] + '월';
+      else if (type === 'day') decoded = DAY_CODE_V2[c] + '일';
+
+      const isSelected = c === currentChar ? 'selected' : '';
+      const isOriginal = c === currentChar ? 'ocr-original' : '';
+      return `<button class="char-option ${isSelected} ${isOriginal}" data-char="${c}" data-type="${type}" onclick="pickChar(this)">
+        <span class="char-code">${c}</span><span class="char-decoded">${decoded}</span>
+      </button>`;
+    }).join('');
+  }
+
+  let pickerHtml = '';
+  if (hasAmbiguity) {
+    pickerHtml = `
+      <div class="char-picker-section">
+        <div class="char-picker-title">⚠️ OCR 인식이 애매한 문자 — 탭하여 변경</div>
+        ${yearCandidates.length > 1 ? `
+        <div class="char-picker-row">
+          <span class="char-picker-label">연도 코드</span>
+          <div class="char-picker-options" id="yearPicker">${makeOptions(yearCandidates, result.yearChar, 'year')}</div>
+        </div>` : ''}
+        ${monthCandidates.length > 1 ? `
+        <div class="char-picker-row">
+          <span class="char-picker-label">월 코드</span>
+          <div class="char-picker-options" id="monthPicker">${makeOptions(monthCandidates, result.monthChar, 'month')}</div>
+        </div>` : ''}
+        ${dayCandidates.length > 1 ? `
+        <div class="char-picker-row">
+          <span class="char-picker-label">일 코드</span>
+          <div class="char-picker-options" id="dayPicker">${makeOptions(dayCandidates, result.dayChar, 'day')}</div>
+        </div>` : ''}
+      </div>
+    `;
+  }
+
+  card.innerHTML = `
+    <div class="result-header">
+      <span class="badge">${result.serialType}</span>
+      <span class="serial-text" id="resultSerialText">${serialHtml}</span>
+    </div>
+    <div class="date-display" id="resultDateDisplay">
+      <div class="label">생 산 일 자</div>
+      <div class="date" id="resultDate">${result.dateStr}</div>
+      <div class="date-sub" id="resultDateSub">${result.year}년 ${result.monthName} ${result.day}일 (${result.dayOfWeek})</div>
+    </div>
+    ${pickerHtml}
+    <div class="detail-section">
+      <div class="detail-title">📝 파싱 근거</div>
+      <div class="detail-row">
+        <span class="key">연도 코드</span>
+        <span class="val" id="detailYear"><span class="highlight">${result.yearChar}</span> → ${result.year}년</span>
+      </div>
+      <div class="detail-row">
+        <span class="key">월 코드</span>
+        <span class="val" id="detailMonth"><span class="highlight">${result.monthChar}</span> → ${result.month}월</span>
+      </div>
+      <div class="detail-row">
+        <span class="key">일 코드</span>
+        <span class="val" id="detailDay"><span class="highlight">${result.dayChar}</span> → ${result.day}일</span>
+      </div>
+      <div class="detail-row">
+        <span class="key">시리얼 타입</span>
+        <span class="val">${result.serialType}${result.serialType === '10자리' ? ' (HPPS Code)' : result.serialType === '25자리' ? ' (E-PASS Label)' : ' (YMD 직접 입력)'}</span>
+      </div>
+    </div>
+  `;
+  card.classList.add('show');
+
+  // 히스토리에 추가
+  addHistory(result.serial, result.dateStr);
+}
+
+// 사용자가 애매한 문자를 탭하여 선택
+function pickChar(btn) {
+  const type = btn.dataset.type;
+  const char = btn.dataset.char;
+
+  // 같은 타입의 모든 버튼에서 selected 제거
+  const container = btn.parentElement;
+  container.querySelectorAll('.char-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  // 현재 상태 업데이트
+  if (!currentResultState) return;
+
+  const s = currentResultState.serial;
+  let newSerial = s;
+
+  if (type === 'year') {
+    currentResultState.yearChar = char;
+    if (currentResultState.serialType === '10자리') {
+      newSerial = s.slice(0,4) + char + s.slice(5);
+    } else {
+      newSerial = s.slice(0,18) + char + s.slice(19);
+    }
+  } else if (type === 'month') {
+    currentResultState.monthChar = char;
+    if (currentResultState.serialType === '10자리') {
+      newSerial = s.slice(0,5) + char + s.slice(6);
+    } else {
+      newSerial = s.slice(0,19) + char + s.slice(20);
+    }
+  } else if (type === 'day') {
+    currentResultState.dayChar = char;
+    if (currentResultState.serialType === '10자리') {
+      newSerial = s.slice(0,6) + char + s.slice(7);
+    } else {
+      newSerial = s.slice(0,20) + char + s.slice(21);
+    }
+  }
+
+  currentResultState.serial = newSerial;
+
+  // 디코드
+  const year = decodeYear(currentResultState.yearChar);
+  const month = MONTH_CODE[currentResultState.monthChar];
+  const day = DAY_CODE_V2[currentResultState.dayChar];
+
+  if (year) currentResultState.year = year;
+  if (month) currentResultState.month = month;
+  if (day) currentResultState.day = day;
+
+  currentResultState.dateStr = `${currentResultState.year}.${String(currentResultState.month).padStart(2,'0')}.${String(currentResultState.day).padStart(2,'0')}`;
+  currentResultState.dayOfWeek = getDayOfWeek(currentResultState.year, currentResultState.month, currentResultState.day);
+  currentResultState.monthName = MONTH_NAMES[currentResultState.month];
+
+  // UI 업데이트 (깜빡임 없이)
+  const dateEl = document.getElementById('resultDate');
+  const dateSubEl = document.getElementById('resultDateSub');
+  const detailYearEl = document.getElementById('detailYear');
+  const detailMonthEl = document.getElementById('detailMonth');
+  const detailDayEl = document.getElementById('detailDay');
+  const serialTextEl = document.getElementById('resultSerialText');
+
+  if (dateEl) {
+    dateEl.textContent = currentResultState.dateStr;
+    // 날짜 변경 애니메이션
+    dateEl.style.transition = 'transform 0.15s, color 0.15s';
+    dateEl.style.transform = 'scale(1.05)';
+    dateEl.style.color = '#0096D6';
+    setTimeout(() => {
+      dateEl.style.transform = 'scale(1)';
+      dateEl.style.color = '#059669';
+    }, 200);
+  }
+  if (dateSubEl) dateSubEl.textContent = `${currentResultState.year}년 ${currentResultState.monthName} ${currentResultState.day}일 (${currentResultState.dayOfWeek})`;
+  if (detailYearEl) detailYearEl.innerHTML = `<span class="highlight">${currentResultState.yearChar}</span> → ${currentResultState.year}년`;
+  if (detailMonthEl) detailMonthEl.innerHTML = `<span class="highlight">${currentResultState.monthChar}</span> → ${currentResultState.month}월`;
+  if (detailDayEl) detailDayEl.innerHTML = `<span class="highlight">${currentResultState.dayChar}</span> → ${currentResultState.day}일`;
+
+  // 시리얼 텍스트 하이라이트 업데이트
+  if (serialTextEl) {
+    const ns = currentResultState.serial;
+    if (currentResultState.serialType === '10자리') {
+      serialTextEl.innerHTML = `${ns.slice(0,4)}<span style="color:#fff;font-weight:700;text-decoration:underline">${ns.slice(4,7)}</span>${ns.slice(7)}`;
+    } else {
+      serialTextEl.innerHTML = `${ns.slice(0,18)}<span style="color:#fff;font-weight:700;text-decoration:underline">${ns.slice(18,21)}</span>${ns.slice(21)}`;
+    }
+  }
+
+  // 입력창도 업데이트
+  document.getElementById('serialInput').value = newSerial;
+
+  // 히스토리 업데이트
+  addHistory(currentResultState.serial, currentResultState.dateStr);
+}
+
+function checkSerial() {
+  const input = document.getElementById('serialInput').value.trim();
+  if (!input) {
+    alert('시리얼 번호를 입력해주세요.');
+    return;
+  }
+  const result = parseSerial(input);
+  showResult(result, false); // 수동 입력 — 후보 선택 불필요
+}
+
+// ========== 날짜코드 3자리 입력 ==========
+function toggleDatecodeInput() {
+  const btn = document.getElementById('datecodeToggle');
+  const section = document.getElementById('datecodeSection');
+  btn.classList.toggle('open');
+  section.classList.toggle('active');
+  if (section.classList.contains('active')) {
+    document.getElementById('dcYear').focus();
+  }
+}
+
+function datecodeAutoNext(current, nextId) {
+  // 대문자 변환
+  current.value = current.value.toUpperCase();
+  if (current.value.length === 1 && nextId) {
+    document.getElementById(nextId).focus();
+  }
+}
+
+function checkDatecode() {
+  const yc = document.getElementById('dcYear').value.trim().toUpperCase();
+  const mc = document.getElementById('dcMonth').value.trim().toUpperCase();
+  const dc = document.getElementById('dcDay').value.trim().toUpperCase();
+
+  if (!yc || !mc || !dc) {
+    alert('연도(Y), 월(M), 일(D) 코드를 모두 입력해주세요.');
+    return;
+  }
+
+  const year = decodeYear(yc);
+  const month = MONTH_CODE[mc];
+  const day = DAY_CODE_V2[dc];
+
+  if (!year) { alert(`연도 코드 '${yc}' 를 인식할 수 없습니다.`); return; }
+  if (!month) { alert(`월 코드 '${mc}' 를 인식할 수 없습니다.`); return; }
+  if (!day) { alert(`일 코드 '${dc}' 를 인식할 수 없습니다.`); return; }
+
+  const dateStr = `${year}.${String(month).padStart(2,'0')}.${String(day).padStart(2,'0')}`;
+  const dayOfWeek = getDayOfWeek(year, month, day);
+
+  const result = {
+    error: false,
+    serial: yc + mc + dc,
+    serialType: '코드 3자리',
+    year, month, day,
+    yearChar: yc, monthChar: mc, dayChar: dc,
+    dateStr,
+    dayOfWeek,
+    monthName: MONTH_NAMES[month]
+  };
+
+  showResult(result, false);
+}
+
+// Enter 키
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('serialInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkSerial();
+  });
+  // 날짜코드 입력 Enter 키
+  ['dcYear','dcMonth','dcDay'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkDatecode();
+    });
+  });
+  loadHistory();
+});
+
+// ========== 참조표 토글 ==========
+function toggleRefPanel() {
+  const btn = document.getElementById('refToggleBtn');
+  const panel = document.getElementById('refPanel');
+  btn.classList.toggle('open');
+  panel.classList.toggle('open');
+}
+
+// ========== 카메라 (실시간 가이드라인) + 갤러리 + OCR ==========
+
+let cameraStream = null;
+
+async function openCamera() {
+  const overlay = document.getElementById('cameraOverlay');
+  const video = document.getElementById('cameraVideo');
+
+  try {
+    // 후면 카메라 우선
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      },
+      audio: false
+    });
+
+    cameraStream = stream;
+    video.srcObject = stream;
+    await video.play();
+
+    overlay.classList.add('active');
+    updateGuideBox();
+
+    // 화면 방향 변경 시 가이드 박스 크기 업데이트
+    window.addEventListener('resize', updateGuideBox);
+
+  } catch (err) {
+    console.warn('[카메라 직접 접근 실패]', err.message);
+    // 폴백: 기존 file input 방식
+    document.getElementById('cameraInput').click();
+  }
+}
+
+function updateGuideBox() {
+  const guideBox = document.getElementById('guideBox');
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // 가이드 박스: 화면 가로 92%, 세로는 얇게 (시리얼 한 줄에 맞춤)
+  const boxW = Math.min(vw * 0.92, 600);
+  const boxH = Math.max(boxW * 0.10, 44);  // 가로 대비 약 10% 높이 → 가로로 긴 직사각형
+
+  guideBox.style.width = boxW + 'px';
+  guideBox.style.height = boxH + 'px';
+
+  // 가이드 텍스트 위치 — 박스가 얇으므로 간격 조정
+  const guideTextTop = document.getElementById('guideTextTop');
+  const guideTextHint = document.getElementById('guideTextHint');
+  guideTextTop.style.bottom = `calc(50% + ${boxH / 2 + 20}px)`;
+  guideTextHint.style.top = `calc(50% + ${boxH / 2 + 14}px)`;
+}
+
+function closeCamera() {
+  const overlay = document.getElementById('cameraOverlay');
+  const video = document.getElementById('cameraVideo');
+
+  overlay.classList.remove('active');
+
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  video.srcObject = null;
+  window.removeEventListener('resize', updateGuideBox);
+}
+
+async function capturePhoto() {
+  const video = document.getElementById('cameraVideo');
+  const guideBox = document.getElementById('guideBox');
+  const flashEl = document.getElementById('flashEffect');
+
+  // 플래시 효과
+  flashEl.classList.add('flash');
+  setTimeout(() => flashEl.classList.remove('flash'), 200);
+
+  // 비디오 프레임을 캔버스에 캡처
+  const vw = video.videoWidth;
+  const vh = video.videoHeight;
+
+  // 화면 기준 가이드 박스 위치 계산
+  const overlayRect = document.getElementById('cameraOverlay').getBoundingClientRect();
+  const boxRect = guideBox.getBoundingClientRect();
+
+  // 비디오가 object-fit:cover 되어 있으므로 실제 비디오 영역 계산
+  const dispW = overlayRect.width;
+  const dispH = overlayRect.height;
+  const vidAspect = vw / vh;
+  const dispAspect = dispW / dispH;
+
+  let renderW, renderH, offsetX, offsetY;
+  if (vidAspect > dispAspect) {
+    // 비디오가 더 넓음 → 좌우 잘림
+    renderH = dispH;
+    renderW = dispH * vidAspect;
+    offsetX = (renderW - dispW) / 2;
+    offsetY = 0;
+  } else {
+    // 비디오가 더 높음 → 상하 잘림
+    renderW = dispW;
+    renderH = dispW / vidAspect;
+    offsetX = 0;
+    offsetY = (renderH - dispH) / 2;
+  }
+
+  // 가이드 박스 영역을 비디오 좌표로 변환
+  const scaleX = vw / renderW;
+  const scaleY = vh / renderH;
+
+  // 여유분 추가 (위아래 60%, 좌우 5%) — 얇은 가이드 박스에 맞게 위아래 넉넉히
+  const marginX = boxRect.width * 0.05;
+  const marginY = boxRect.height * 0.6;
+
+  let cropX = (boxRect.left - overlayRect.left + offsetX - marginX) * scaleX;
+  let cropY = (boxRect.top - overlayRect.top + offsetY - marginY) * scaleY;
+  let cropW = (boxRect.width + marginX * 2) * scaleX;
+  let cropH = (boxRect.height + marginY * 2) * scaleY;
+
+  // 범위 클램핑
+  cropX = Math.max(0, Math.round(cropX));
+  cropY = Math.max(0, Math.round(cropY));
+  cropW = Math.min(vw - cropX, Math.round(cropW));
+  cropH = Math.min(vh - cropY, Math.round(cropH));
+
+  // 가이드 영역만 크롭하여 캡처
+  const captureCanvas = document.createElement('canvas');
+  captureCanvas.width = cropW;
+  captureCanvas.height = cropH;
+  const capCtx = captureCanvas.getContext('2d');
+  capCtx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+  // 카메라 닫기
+  closeCamera();
+
+  // 크롭된 이미지를 Blob으로 변환 → OCR 처리
+  captureCanvas.toBlob(async (blob) => {
+    if (!blob) return;
+    const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+    await processImageFile(file);
+  }, 'image/jpeg', 0.95);
+}
+
+function openGallery() {
+  document.getElementById('galleryInput').click();
+}
+
+// ========== 이미지 전처리 ==========
+
+// 그레이스케일 변환
+function toGrayscale(imageData) {
+  const d = imageData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+    d[i] = d[i+1] = d[i+2] = gray;
+  }
+}
+
+// 언샤프 마스크 (블러한 이미지와 차이로 선명하게)
+function sharpen(canvas, ctx, amount = 1.5) {
+  const w = canvas.width, h = canvas.height;
+  const src = ctx.getImageData(0, 0, w, h);
+  const dst = ctx.createImageData(w, h);
+  const sd = src.data, dd = dst.data;
+
+  const k = amount;
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const idx = (y * w + x) * 4;
+      for (let c = 0; c < 3; c++) {
+        const val = sd[idx + c] * (1 + 4 * k)
+          - sd[((y-1)*w + x)*4 + c] * k
+          - sd[((y+1)*w + x)*4 + c] * k
+          - sd[(y*w + x-1)*4 + c] * k
+          - sd[(y*w + x+1)*4 + c] * k;
+        dd[idx + c] = Math.min(255, Math.max(0, val));
+      }
+      dd[idx + 3] = 255;
+    }
+  }
+  ctx.putImageData(dst, 0, 0);
+}
+
+// 대비 강화 (히스토그램 스트레칭 + 감마)
+function enhanceContrast(imageData, gamma = 0.8) {
+  const d = imageData.data;
+  let minVal = 255, maxVal = 0;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i] < minVal) minVal = d[i];
+    if (d[i] > maxVal) maxVal = d[i];
+  }
+  const range = maxVal - minVal || 1;
+  for (let i = 0; i < d.length; i += 4) {
+    let norm = (d[i] - minVal) / range;
+    norm = Math.pow(norm, gamma);
+    const val = norm * 255;
+    d[i] = d[i+1] = d[i+2] = val;
+  }
+}
+
+// Otsu 이진화
+function otsuBinarize(imageData) {
+  const d = imageData.data;
+  const total = imageData.width * imageData.height;
+  const hist = new Array(256).fill(0);
+  for (let i = 0; i < d.length; i += 4) hist[Math.round(d[i])]++;
+  let sum = 0;
+  for (let i = 0; i < 256; i++) sum += i * hist[i];
+  let sumB = 0, wB = 0, maxVar = 0, threshold = 128;
+  for (let i = 0; i < 256; i++) {
+    wB += hist[i];
+    if (wB === 0) continue;
+    const wF = total - wB;
+    if (wF === 0) break;
+    sumB += i * hist[i];
+    const mB = sumB / wB, mF = (sum - sumB) / wF;
+    const v = wB * wF * (mB - mF) * (mB - mF);
+    if (v > maxVar) { maxVar = v; threshold = i; }
+  }
+  for (let i = 0; i < d.length; i += 4) {
+    const val = d[i] > threshold ? 255 : 0;
+    d[i] = d[i+1] = d[i+2] = val;
+  }
+}
+
+// 적응형 이진화 (로컬 블록 기반 — Otsu보다 기울어진 텍스트에 강함)
+function adaptiveBinarize(imageData, blockSize = 15, C = 8) {
+  const d = imageData.data;
+  const w = imageData.width, h = imageData.height;
+  const gray = new Uint8Array(w * h);
+  for (let i = 0; i < gray.length; i++) gray[i] = d[i * 4];
+
+  // 적분 이미지 (integral image)
+  const integral = new Float64Array(w * h);
+  for (let y = 0; y < h; y++) {
+    let rowSum = 0;
+    for (let x = 0; x < w; x++) {
+      rowSum += gray[y * w + x];
+      integral[y * w + x] = rowSum + (y > 0 ? integral[(y-1) * w + x] : 0);
+    }
+  }
+
+  const half = Math.floor(blockSize / 2);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const x1 = Math.max(0, x - half), y1 = Math.max(0, y - half);
+      const x2 = Math.min(w - 1, x + half), y2 = Math.min(h - 1, y + half);
+      const count = (x2 - x1 + 1) * (y2 - y1 + 1);
+      let sum = integral[y2 * w + x2];
+      if (x1 > 0) sum -= integral[y2 * w + (x1 - 1)];
+      if (y1 > 0) sum -= integral[(y1 - 1) * w + x2];
+      if (x1 > 0 && y1 > 0) sum += integral[(y1 - 1) * w + (x1 - 1)];
+      const mean = sum / count;
+      const val = gray[y * w + x] > (mean - C) ? 255 : 0;
+      const idx = (y * w + x) * 4;
+      d[idx] = d[idx+1] = d[idx+2] = val;
+    }
+  }
+}
+
+// 이미지를 특정 각도로 회전
+function rotateCanvas(srcCanvas, angleDeg) {
+  const rad = angleDeg * Math.PI / 180;
+  const cos = Math.abs(Math.cos(rad)), sin = Math.abs(Math.sin(rad));
+  const sw = srcCanvas.width, sh = srcCanvas.height;
+  const nw = Math.ceil(sw * cos + sh * sin);
+  const nh = Math.ceil(sw * sin + sh * cos);
+
+  const rotCanvas = document.createElement('canvas');
+  rotCanvas.width = nw;
+  rotCanvas.height = nh;
+  const rCtx = rotCanvas.getContext('2d');
+  rCtx.fillStyle = '#ffffff';
+  rCtx.fillRect(0, 0, nw, nh);
+  rCtx.translate(nw / 2, nh / 2);
+  rCtx.rotate(rad);
+  rCtx.drawImage(srcCanvas, -sw / 2, -sh / 2);
+  return rotCanvas;
+}
+
+// 간이 기울기 감지 — 이진화 이미지에서 텍스트 행의 기울기 추정
+function detectSkewAngle(canvas) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const d = imgData.data;
+
+  // 그레이스케일 & 간단한 이진화
+  const binary = new Uint8Array(w * h);
+  for (let i = 0; i < binary.length; i++) {
+    const g = 0.299 * d[i*4] + 0.587 * d[i*4+1] + 0.114 * d[i*4+2];
+    binary[i] = g < 128 ? 1 : 0; // 어두운 픽셀 = 텍스트
+  }
+
+  // Hough-like: 각 행에서 텍스트 시작점(왼쪽 첫 검정 픽셀) 수집
+  const rowStarts = [];
+  const sampleStep = Math.max(1, Math.floor(h / 80)); // 최대 80줄 샘플링
+  for (let y = Math.floor(h * 0.1); y < Math.floor(h * 0.9); y += sampleStep) {
+    for (let x = Math.floor(w * 0.05); x < Math.floor(w * 0.5); x++) {
+      if (binary[y * w + x]) {
+        rowStarts.push({ x, y });
+        break;
+      }
+    }
+  }
+
+  if (rowStarts.length < 5) return 0; // 데이터 부족
+
+  // 최소자승법으로 기울기 추정
+  let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+  const n = rowStarts.length;
+  for (const p of rowStarts) {
+    sumX += p.y; sumY += p.x; sumXY += p.y * p.x; sumXX += p.y * p.y;
+  }
+  const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+  const angle = Math.atan(slope) * (180 / Math.PI);
+
+  // 합리적인 범위로 제한 (-20° ~ +20°)
+  if (Math.abs(angle) > 20) return 0;
+  return -angle; // 보정할 각도 (반대 방향)
+}
+
+// 캔버스에 이미지를 그리고 원하는 전처리 적용
+function prepareCanvas(img, canvas, ctx, opts = {}) {
+  const { upscale = 1, doSharpen = false, doBinarize = false, cropBottom = false,
+          rotateDeg = 0, doDeskew = false, adaptiveBin = false } = opts;
+
+  let srcCanvas = canvas;
+  let srcCtx = ctx;
+
+  // 업스케일
+  const maxW = 1600 * upscale;
+  const scale = Math.min(maxW / img.width, upscale);
+  srcCanvas.width = Math.round(img.width * scale);
+  srcCanvas.height = Math.round(img.height * scale);
+  srcCtx.drawImage(img, 0, 0, srcCanvas.width, srcCanvas.height);
+
+  // 하단 크롭
+  if (cropBottom) {
+    const tmpCanvas = document.createElement('canvas');
+    const tmpCtx = tmpCanvas.getContext('2d');
+    const cropY = Math.floor(srcCanvas.height * 0.4);
+    tmpCanvas.width = srcCanvas.width;
+    tmpCanvas.height = srcCanvas.height - cropY;
+    tmpCtx.drawImage(srcCanvas, 0, cropY, srcCanvas.width, tmpCanvas.height,
+                     0, 0, tmpCanvas.width, tmpCanvas.height);
+    srcCanvas.width = tmpCanvas.width;
+    srcCanvas.height = tmpCanvas.height;
+    srcCtx.drawImage(tmpCanvas, 0, 0);
+  }
+
+  // 자동 기울기 보정
+  if (doDeskew) {
+    const skewAngle = detectSkewAngle(srcCanvas);
+    if (Math.abs(skewAngle) > 0.5) {
+      console.log(`[Deskew] 감지 각도: ${skewAngle.toFixed(1)}°`);
+      const rotated = rotateCanvas(srcCanvas, skewAngle);
+      srcCanvas.width = rotated.width;
+      srcCanvas.height = rotated.height;
+      srcCtx.drawImage(rotated, 0, 0);
+    }
+  }
+
+  // 수동 회전 (다중 각도 시도용)
+  if (rotateDeg !== 0) {
+    const rotated = rotateCanvas(srcCanvas, rotateDeg);
+    srcCanvas.width = rotated.width;
+    srcCanvas.height = rotated.height;
+    srcCtx.drawImage(rotated, 0, 0);
+  }
+
+  // 샤프닝
+  if (doSharpen) {
+    sharpen(srcCanvas, srcCtx, 1.2);
+  }
+
+  // 그레이스케일 + 대비 + 이진화
+  if (doBinarize) {
+    const imageData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+    toGrayscale(imageData);
+    enhanceContrast(imageData, 0.7);
+    if (adaptiveBin) {
+      adaptiveBinarize(imageData, 21, 10);
+    } else {
+      otsuBinarize(imageData);
+    }
+    srcCtx.putImageData(imageData, 0, 0);
+  }
+
+  return srcCanvas;
+}
+
+// ========== CN 시리얼 추출 함수 ==========
+
+// 기울어진 이미지에서 자주 발생하는 문자 오인식 보정 맵
+const OCR_CHAR_FIX = {
+  // 숫자↔문자 혼동
+  '0': 'O', 'O': 'O', 'o': 'O',
+  '1': '1', 'I': 'I', 'l': 'L', '|': 'I',
+  '8': 'B', '5': 'S', '6': 'G', '2': 'Z',
+  // 기울기로 인한 혼동
+  'U': 'V', 'V': 'V',
+  '{': 'C', '[': 'C', '(': 'C',
+  '}': 'J', ']': 'J', ')': 'J',
+};
+
+// CN 시작 부분의 오인식 보정 (C, N 각각)
+const C_CANDIDATES = ['C', 'G', '(', '{', '[', '0', 'O', 'c'];
+const N_CANDIDATES = ['N', 'M', 'H', 'W', 'n', 'N'];
+
+function fixOcrChar(ch) {
+  const c = ch.toUpperCase();
+  // 일반 문자는 그대로
+  if (/[A-Z0-9]/.test(c)) return c;
+  return OCR_CHAR_FIX[ch] || c;
+}
+
+// 전체 문자열에서 각 글자를 보정
+function fixOcrString(str) {
+  return str.split('').map(c => fixOcrChar(c)).join('');
+}
+
+function extractCNSerial(ocrText) {
+  const rawText = ocrText.toUpperCase();
+  console.log('[OCR 원본]', ocrText);
+
+  let foundSerial = null;
+
+  // ===== 0단계: S/N, M/I 라벨 뒤에서 CN 추출 (가장 정확) =====
+  const lines = rawText.split('\n');
+  for (const line of lines) {
+    if (/S\s*\/?\s*N|M\s*\/?\s*I|SN\s*:|MI\s*:/i.test(line)) {
+      const lineClean = line.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+      const stripped = lineClean.replace(/^.*?(CN)/, '$1');
+      const m25 = stripped.match(/^CN[A-Z0-9]{23}/);
+      if (m25) { foundSerial = m25[0]; break; }
+      const m10 = stripped.match(/^CN[A-Z0-9]{8}/);
+      if (m10) { foundSerial = m10[0]; break; }
+      const f25 = lineClean.match(/CN[A-Z0-9]{23}/);
+      if (f25) { foundSerial = f25[0]; break; }
+      const f10 = lineClean.match(/CN[A-Z0-9]{8}/);
+      if (f10) { foundSerial = f10[0]; break; }
+    }
+  }
+  if (foundSerial) { console.log('[0단계-라벨]', foundSerial); return foundSerial; }
+
+  // ===== 1단계: 단어 단위 CN 검색 =====
+  const cleanText = rawText.replace(/[^A-Z0-9\n\s]/g, '');
+  const words = cleanText.split(/\s+/);
+
+  for (const w of words) {
+    if (w.length === 25 && w.startsWith('CN')) { foundSerial = w; break; }
+  }
+  if (!foundSerial) {
+    for (const w of words) {
+      if (w.length === 10 && w.startsWith('CN')) { foundSerial = w; break; }
+    }
+  }
+  if (foundSerial) { console.log('[1단계-단어]', foundSerial); return foundSerial; }
+
+  // ===== 2단계: 전체 텍스트 연결 후 CN 정규식 =====
+  const allText = cleanText.replace(/\s+/g, '');
+  const match25 = allText.match(/CN[A-Z0-9]{23}/);
+  if (match25) { console.log('[2단계-연결25]', match25[0]); return match25[0]; }
+  const match10 = allText.match(/CN[A-Z0-9]{8}/);
+  if (match10) { console.log('[2단계-연결10]', match10[0]); return match10[0]; }
+
+  // ===== 3단계: 줄 단위 CN 추출 (특수문자 제거) =====
+  for (const line of lines) {
+    if (line.toUpperCase().includes('CN') || line.toUpperCase().includes('CM') || line.toUpperCase().includes('GN')) {
+      const lineClean = fixOcrString(line.replace(/[^A-Z0-9]/gi, '').toUpperCase());
+      const m25 = lineClean.match(/CN[A-Z0-9]{23}/);
+      if (m25) { console.log('[3단계-줄25]', m25[0]); return m25[0]; }
+      const m10 = lineClean.match(/CN[A-Z0-9]{8}/);
+      if (m10) { console.log('[3단계-줄10]', m10[0]); return m10[0]; }
+    }
+  }
+
+  // ===== 4단계: OCR 오인식 보정 후 재시도 =====
+  // 기울어진 이미지에서 C/N이 다른 문자로 인식되는 경우
+  const fixedAllText = fixOcrString(allText);
+  const fm25 = fixedAllText.match(/CN[A-Z0-9]{23}/);
+  if (fm25) { console.log('[4단계-보정전체25]', fm25[0]); return fm25[0]; }
+  const fm10 = fixedAllText.match(/CN[A-Z0-9]{8}/);
+  if (fm10) { console.log('[4단계-보정전체10]', fm10[0]); return fm10[0]; }
+
+  // ===== 5단계: CN-like 패턴 (C/N 오인식) 탐지 =====
+  // CN의 C가 G,O,(,{,[로, N이 M,H,W로 잘못 인식된 경우
+  const cnLikePattern = /[CGO0({[\[][NMHWK]/g;
+  let cnMatch;
+
+  // 원본 텍스트에서
+  const searchText = rawText.replace(/[^A-Z0-9CGO0({[\]NMHWK]/g, '');
+  while ((cnMatch = cnLikePattern.exec(searchText)) !== null) {
+    const pos = cnMatch.index;
+    // 25자리 시도
+    if (pos + 25 <= searchText.length) {
+      const raw25 = searchText.slice(pos, pos + 25);
+      const candidate = 'CN' + fixOcrString(raw25.slice(2));
+      if (/^CN[A-Z0-9]{23}$/.test(candidate)) {
+        console.log('[5단계-보정25]', candidate, `(원본: ${raw25.slice(0,4)}...)`);
+        return candidate;
+      }
+    }
+    // 10자리 시도
+    if (pos + 10 <= searchText.length) {
+      const raw10 = searchText.slice(pos, pos + 10);
+      const candidate = 'CN' + fixOcrString(raw10.slice(2));
+      if (/^CN[A-Z0-9]{8}$/.test(candidate)) {
+        console.log('[5단계-보정10]', candidate, `(원본: ${raw10.slice(0,4)}...)`);
+        return candidate;
+      }
+    }
+  }
+
+  // ===== 6단계: 줄 단위 보정 재시도 (각 줄을 보정 후 CN 추출) =====
+  for (const line of lines) {
+    const rawLine = line.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+    if (rawLine.length < 8) continue;
+    const fixedLine = fixOcrString(rawLine);
+    const fl25 = fixedLine.match(/CN[A-Z0-9]{23}/);
+    if (fl25) { console.log('[6단계-줄보정25]', fl25[0]); return fl25[0]; }
+    const fl10 = fixedLine.match(/CN[A-Z0-9]{8}/);
+    if (fl10) { console.log('[6단계-줄보정10]', fl10[0]); return fl10[0]; }
+  }
+
+  // ===== 찾지 못함 =====
+  console.log('[OCR] CN 시리얼 찾지 못함. 전체:', cleanText);
+  return null;
+}
+
+// 공통 OCR 처리 함수 — 강화된 다단계 파이프라인 (기울기 보정 포함)
+async function processImageFile(file) {
+  const status = document.getElementById('ocrStatus');
+  status.textContent = '📷 이미지 분석 중...';
+
+  try {
+    const img = await loadImage(file);
+    const canvas = document.getElementById('ocrCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // 1차: 기본 전처리 파이프라인
+    const basicAttempts = [
+      { name: '원본',                opts: { upscale: 1, doSharpen: false, doBinarize: false } },
+      { name: '샤프닝',              opts: { upscale: 1, doSharpen: true,  doBinarize: false } },
+      { name: '2배+샤프닝',          opts: { upscale: 2, doSharpen: true,  doBinarize: false } },
+      { name: '자동기울기보정+샤프닝', opts: { upscale: 2, doSharpen: true,  doBinarize: false, doDeskew: true } },
+      { name: '이진화(Otsu)',        opts: { upscale: 2, doSharpen: true,  doBinarize: true } },
+      { name: '적응형이진화',         opts: { upscale: 2, doSharpen: true,  doBinarize: true,  adaptiveBin: true } },
+      { name: '자동기울기+이진화',    opts: { upscale: 2, doSharpen: true,  doBinarize: true,  doDeskew: true } },
+      { name: '하단크롭+샤프닝',     opts: { upscale: 2, doSharpen: true,  doBinarize: false, cropBottom: true } },
+    ];
+
+    // 2차: 수동 회전 시도 (기울기가 심한 경우)
+    const rotationAngles = [-10, -7, -5, -3, 3, 5, 7, 10];
+    const rotationAttempts = rotationAngles.map(deg => ({
+      name: `회전 ${deg > 0 ? '+' : ''}${deg}°+샤프닝`,
+      opts: { upscale: 2, doSharpen: true, doBinarize: false, rotateDeg: deg }
+    }));
+
+    const allAttempts = [...basicAttempts, ...rotationAttempts];
+    const totalSteps = allAttempts.length;
+
+    let foundSerial = null;
+    let attemptNum = 0;
+
+    for (const attempt of allAttempts) {
+      attemptNum++;
+      const label = `[${attemptNum}/${totalSteps}] ${attempt.name}`;
+      console.log(`[OCR 시도] ${label}`);
+
+      if (attemptNum <= basicAttempts.length) {
+        status.textContent = attemptNum === 1
+          ? '🔍 텍스트 인식 중... (최초 로딩 시 시간이 걸릴 수 있습니다)'
+          : `🔍 ${attempt.name} 분석 중... (${attemptNum}/${basicAttempts.length})`;
+      } else {
+        status.textContent = `🔄 기울기 보정 시도 중... (${attempt.name})`;
+      }
+
+      prepareCanvas(img, canvas, ctx, attempt.opts);
+
+      const ocrOpts = attemptNum === 1 ? {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            const pct = Math.round((m.progress || 0) * 100);
+            status.textContent = `🔍 텍스트 인식 중... ${pct}%`;
+          }
+        }
+      } : {};
+
+      const { data } = await Tesseract.recognize(canvas, 'eng', ocrOpts);
+      foundSerial = extractCNSerial(data.text);
+
+      if (foundSerial) {
+        console.log(`[OCR 성공] ${label} → ${foundSerial}`);
+        break;
+      }
+
+      // 기본 파이프라인 모두 실패 후 회전 시도 전 안내
+      if (attemptNum === basicAttempts.length && !foundSerial) {
+        console.log('[OCR] 기본 파이프라인 실패, 회전 보정 시작...');
+      }
+    }
+
+    // ===== 결과 처리 =====
+    if (foundSerial) {
+      document.getElementById('serialInput').value = foundSerial;
+      status.textContent = `✅ 인식 완료: ${foundSerial}`;
+      const result = parseSerial(foundSerial);
+      showResult(result, true); // OCR — 애매한 문자 선택 UI 표시
+    } else {
+      status.textContent = '⚠️ CN 시리얼을 인식하지 못했습니다. 직접 입력해주세요.';
+    }
+  } catch (err) {
+    status.textContent = '❌ OCR 오류: ' + err.message;
+    console.error('[OCR 에러]', err);
+  }
+}
+
+document.getElementById('cameraInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  await processImageFile(file);
+  e.target.value = '';
+});
+
+document.getElementById('galleryInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  await processImageFile(file);
+  e.target.value = '';
+});
+
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// ========== 히스토리 ==========
+function addHistory(serial, dateStr) {
+  let history = JSON.parse(localStorage.getItem('serialHistory') || '[]');
+  // 중복 제거
+  history = history.filter(h => h.serial !== serial);
+  history.unshift({ serial, dateStr, time: new Date().toLocaleString('ko-KR') });
+  history = history.slice(0, 10); // 최대 10개
+  localStorage.setItem('serialHistory', JSON.stringify(history));
+  renderHistory();
+}
+
+function loadHistory() {
+  renderHistory();
+}
+
+function renderHistory() {
+  const history = JSON.parse(localStorage.getItem('serialHistory') || '[]');
+  const list = document.getElementById('historyList');
+  const section = document.getElementById('historySection');
+
+  if (history.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  list.innerHTML = history.map(h => `
+    <div class="history-item" onclick="recheck('${h.serial}')">
+      <span class="h-serial">${h.serial}</span>
+      <span class="h-date">${h.dateStr}</span>
+    </div>
+  `).join('');
+}
+
+function recheck(serial) {
+  document.getElementById('serialInput').value = serial;
+  const result = parseSerial(serial);
+  showResult(result, false); // 히스토리 재조회 — 후보 선택 불필요
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ========== PWA Service Worker 등록 ==========
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('[SW] 등록 완료:', reg.scope))
+      .catch(err => console.warn('[SW] 등록 실패:', err));
+  });
+}
+
+// ========== iOS PWA 설치 안내 배너 ==========
+(function() {
+  // iOS Safari인지 확인 (standalone이 아닌 경우 = 아직 홈화면 추가 안 함)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  const dismissed = sessionStorage.getItem('pwa-banner-dismissed');
+
+  if (isIOS && !isStandalone && !dismissed) {
+    // 약간 딜레이 후 배너 표시
+    setTimeout(() => {
+      const banner = document.createElement('div');
+      banner.id = 'pwaBanner';
+      banner.innerHTML = `
+        <div style="
+          position:fixed; bottom:0; left:0; right:0; z-index:10000;
+          background:#fff; border-top:2px solid #0096D6;
+          padding:16px 20px; padding-bottom:calc(env(safe-area-inset-bottom,16px) + 8px);
+          box-shadow:0 -2px 12px rgba(0,0,0,0.12);
+          display:flex; align-items:center; gap:12px;
+          font-family:-apple-system,sans-serif;
+          animation: slideUp 0.3s ease;
+        ">
+          <img src="icon-192.png" style="width:48px;height:48px;border-radius:12px;" alt="앱 아이콘">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:700;color:#1a1a2e;">홈 화면에 추가하기</div>
+            <div style="font-size:12px;color:#6b7280;margin-top:2px;">
+              <span style="vertical-align:middle;">Safari 하단</span>
+              <span style="font-size:18px;vertical-align:middle;">⬆️</span>
+              <span style="vertical-align:middle;">→ "홈 화면에 추가"</span>
+            </div>
+          </div>
+          <button onclick="document.getElementById('pwaBanner').remove();sessionStorage.setItem('pwa-banner-dismissed','1');" 
+                  style="background:none;border:none;font-size:20px;color:#9ca3af;padding:8px;cursor:pointer;">✕</button>
+        </div>
+      `;
+      document.body.appendChild(banner);
+    }, 2000);
+  }
+})();
+</script>
+
+<style>
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+</style>
+
+</body>
+</html>
