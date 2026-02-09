@@ -1,11 +1,13 @@
 // HP Serial Check — Service Worker (PWA 완전 오프라인 지원)
-const CACHE_NAME = 'hp-serial-v5';
+const CACHE_NAME = 'hp-serial-v7';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  // 바코드/QR 코드 리더
+  'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js',
   // Tesseract.js 코어
   'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
   // Tesseract.js worker (런타임에 로드됨)

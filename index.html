@@ -223,13 +223,13 @@
     text-align: center;
   }
   .datecode-input {
-    width: 42px;
-    height: 42px;
-    background: #f9fafb;
+    width: 38px;
+    height: 38px;
+    background: #fff;
     border: 1.5px solid #d1d5db;
     border-radius: 8px;
     text-align: center;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
     color: #1a1a2e;
@@ -251,6 +251,80 @@
     text-align: center;
     margin-top: -2px;
   }
+
+  /* 3가지 형식별 날짜코드 입력 카드 */
+  .dc-row-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .dc-row-left {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-width: 110px;
+  }
+  .dc-format-badge {
+    display: inline-block;
+    background: #0096D6;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+  }
+  .dc-format-badge.badge-25 { background: #7c3aed; }
+  .dc-format-badge.badge-14 { background: #059669; }
+  .dc-serial-diagram {
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 11px;
+    color: #6b7280;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+  .dc-serial-diagram .dc-hl {
+    color: #0096D6;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .dc-pos-text {
+    font-size: 10px;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+  .dc-row-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .dc-inputs-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .dc-go-btn {
+    width: 36px;
+    height: 38px;
+    background: #0096D6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .dc-go-btn:active { background: #007ab8; }
+
   .datecode-check-btn {
     flex: 1;
     background: #0096D6;
@@ -304,6 +378,105 @@
     color: rgba(255,255,255,0.9);
     letter-spacing: 0.8px;
     word-break: break-all;
+  }
+
+  /* OCR 인식 이미지 미리보기 */
+  .ocr-preview-section {
+    padding: 10px 16px 6px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  /* 바코드/OCR 인식 출처 표시 */
+  .recognition-source {
+    padding: 10px 18px;
+    background: #f0fdf4;
+    border-bottom: 1px solid #bbf7d0;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .recognition-source .source-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+  .recognition-source .source-row:last-child { margin-bottom: 0; }
+  .recognition-source .source-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .source-badge.barcode {
+    background: #16a34a;
+    color: #fff;
+  }
+  .source-badge.ocr {
+    background: #d1d5db;
+    color: #6b7280;
+  }
+  .recognition-source .source-serial {
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    color: #374151;
+  }
+  .recognition-source .source-serial.active {
+    font-weight: 700;
+    color: #15803d;
+  }
+  .recognition-source .source-serial.muted {
+    color: #9ca3af;
+    text-decoration: line-through;
+  }
+  .recognition-source .source-label {
+    font-size: 10px;
+    color: #9ca3af;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .ocr-preview-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 6px;
+  }
+  .ocr-preview-wrap {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1.5px solid #d1d5db;
+    background: #fff;
+    position: relative;
+  }
+  .ocr-preview-img {
+    width: 100%;
+    display: block;
+    object-fit: contain;
+    background: #f1f5f9;
+    cursor: pointer;
+    transition: max-height 0.3s ease;
+  }
+  .ocr-preview-img.zoomed {
+    transform: scale(1.3);
+    transform-origin: center;
+  }
+  .ocr-preview-hint {
+    font-size: 10px;
+    color: #9ca3af;
+    text-align: center;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .ocr-preview-hint .ymd-mark {
+    display: inline-block;
+    width: 18px;
+    height: 3px;
+    background: rgba(220, 38, 38, 0.7);
+    border-radius: 2px;
+    vertical-align: middle;
+    margin: 0 2px;
   }
 
   /* 큰 날짜 */
@@ -664,9 +837,29 @@
     padding: 0 16px;
   }
   .ref-panel.open {
-    max-height: 800px;
+    max-height: 2400px;
     opacity: 1;
     padding: 16px;
+  }
+
+  .ref-section-header {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0096D6;
+    margin-bottom: 4px;
+    padding: 6px 0 2px;
+  }
+  .ref-section-pos {
+    font-size: 12px;
+    color: #374151;
+    margin-bottom: 10px;
+    line-height: 1.5;
+    font-family: 'SF Mono', monospace;
+  }
+  .ref-section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #d1d5db 30%, #d1d5db 70%, transparent);
+    margin: 16px 0 14px;
   }
 
   /* 하단 푸터 */
@@ -847,28 +1040,76 @@
     </button>
 
     <div class="datecode-section" id="datecodeSection">
-      <div class="datecode-row" style="justify-content:center;gap:10px;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
-          <span class="datecode-label">Y</span>
-          <input type="text" class="datecode-input" id="dcYear" maxlength="1" placeholder="Y"
-                 autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
-                 oninput="datecodeAutoNext(this,'dcMonth')">
+
+      <!-- 10자리 -->
+      <div class="dc-row-card">
+        <div class="dc-row-left">
+          <div class="dc-format-badge">10자리</div>
+          <div class="dc-serial-diagram">CN XX <span class="dc-hl">Y M D</span> XXX</div>
+          <div class="dc-pos-text">5·6·7번째</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
-          <span class="datecode-label">M</span>
-          <input type="text" class="datecode-input" id="dcMonth" maxlength="1" placeholder="M"
-                 autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
-                 oninput="datecodeAutoNext(this,'dcDay')">
+        <div class="dc-row-right">
+          <div class="dc-inputs-group">
+            <input type="text" class="datecode-input" id="dc10Y" maxlength="1" placeholder="Y"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                   oninput="datecodeAutoNext(this,'dc10M')">
+            <input type="text" class="datecode-input" id="dc10M" maxlength="1" placeholder="M"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                   oninput="datecodeAutoNext(this,'dc10D')">
+            <input type="text" class="datecode-input" id="dc10D" maxlength="1" placeholder="D"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                   oninput="datecodeAutoNext(this,null)">
+            <button class="dc-go-btn" onclick="checkDatecode('10자리','dc10Y','dc10M','dc10D')">▶</button>
+          </div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
-          <span class="datecode-label">D</span>
-          <input type="text" class="datecode-input" id="dcDay" maxlength="1" placeholder="D"
-                 autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
-                 oninput="datecodeAutoNext(this,null)">
-        </div>
-        <button class="datecode-check-btn" style="flex:0 0 auto;padding:10px 18px;height:42px;align-self:flex-end;" onclick="checkDatecode()">조회</button>
       </div>
-      <div class="datecode-hint">시리얼의 연도·월·일 코드 문자를 각각 1자씩 입력</div>
+
+      <!-- 25자리 -->
+      <div class="dc-row-card">
+        <div class="dc-row-left">
+          <div class="dc-format-badge badge-25">25자리</div>
+          <div class="dc-serial-diagram">…XXXX <span class="dc-hl">Y M D</span> XXXX</div>
+          <div class="dc-pos-text">19·20·21번째</div>
+        </div>
+        <div class="dc-row-right">
+          <div class="dc-inputs-group">
+            <input type="text" class="datecode-input" id="dc25Y" maxlength="1" placeholder="Y"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                   oninput="datecodeAutoNext(this,'dc25M')">
+            <input type="text" class="datecode-input" id="dc25M" maxlength="1" placeholder="M"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                   oninput="datecodeAutoNext(this,'dc25D')">
+            <input type="text" class="datecode-input" id="dc25D" maxlength="1" placeholder="D"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                   oninput="datecodeAutoNext(this,null)">
+            <button class="dc-go-btn" onclick="checkDatecode('25자리','dc25Y','dc25M','dc25D')">▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 14자리 -->
+      <div class="dc-row-card">
+        <div class="dc-row-left">
+          <div class="dc-format-badge badge-14">14자리</div>
+          <div class="dc-serial-diagram">CN <span class="dc-hl">Y M D</span> XXXXXXXXX</div>
+          <div class="dc-pos-text">3·4·5번째</div>
+        </div>
+        <div class="dc-row-right">
+          <div class="dc-inputs-group">
+            <input type="text" class="datecode-input" id="dc14Y" maxlength="1" placeholder="Y"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                   oninput="datecodeAutoNext(this,'dc14M')">
+            <input type="text" class="datecode-input" id="dc14M" maxlength="1" placeholder="M"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                   oninput="datecodeAutoNext(this,'dc14D')">
+            <input type="text" class="datecode-input" id="dc14D" maxlength="1" placeholder="D"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                   oninput="datecodeAutoNext(this,null)">
+            <button class="dc-go-btn" onclick="checkDatecode('14자리','dc14Y','dc14M','dc14D')">▶</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -882,59 +1123,81 @@
 
 <!-- 참조표 패널 (토글) -->
 <div class="ref-panel" id="refPanel">
-  <div style="margin-bottom:14px; font-size:13px; color:#374151; line-height:1.7;">
-    <div style="font-weight:700; color:#1a1a2e; margin-bottom:6px;">📌 시리얼 번호에서 날짜 위치</div>
-    <div>• 10자리: CN XX <b style="color:#0096D6;text-decoration:underline;">Y M D</b> XXX &nbsp;→ <b>5·6·7</b>번째</div>
-    <div>• 25자리: CN XXXXXXXXXXXXXXXX <b style="color:#0096D6;text-decoration:underline;">Y M D</b> XXXX &nbsp;→ <b>19·20·21</b>번째</div>
-    <div style="font-size:11px; color:#9ca3af; margin-top:4px;">Y=연도, M=월, D=일</div>
-  </div>
-  <div class="ref-table-title">📅 연도 코드표 (2011~2040)</div>
+
+  <!-- ━━━ 섹션 1: 10자리 ━━━ -->
+  <div class="ref-section-header">① 10자리 시리얼 (HPPS Code)</div>
+  <div class="ref-section-pos">CN XX <b style="color:#0096D6;text-decoration:underline;">Y M D</b> XXX → <b>5·6·7</b>번째</div>
+
+  <div class="ref-table-title">📅 연도 코드 (2011~2029)</div>
   <table class="ref-table">
-    <tr>
-      <th>연도</th><th>'11</th><th>'12</th><th>'13</th><th>'14</th><th>'15</th><th>'16</th><th>'17</th><th>'18</th><th>'19</th><th>'20</th>
-    </tr>
-    <tr>
-      <th>코드</th><td>C</td><td>D</td><td>F</td><td>G</td><td>H</td><td>J</td><td>K</td><td>L</td><td>M</td><td>N</td>
-    </tr>
-    <tr>
-      <th>연도</th><th>'21</th><th>'22</th><th>'23</th><th>'24</th><th>'25</th><th>'26</th><th>'27</th><th>'28</th><th>'29</th><th>'30</th>
-    </tr>
-    <tr>
-      <th>코드</th><td>R</td><td>T</td><td>W</td><td>X</td><td>Y</td><td>L</td><td>P</td><td>Q</td><td>S</td><td>Z</td>
-    </tr>
-    <tr>
-      <th>연도</th><th>'31</th><th>'32</th><th>'33</th><th>'34</th><th>'35</th><th>'36</th><th>'37</th><th>'38</th><th>'39</th><th>'40</th>
-    </tr>
-    <tr>
-      <th>코드</th><td>B</td><td>C</td><td>D</td><td>F</td><td>G</td><td>H</td><td>J</td><td>K</td><td>M</td><td>N</td>
-    </tr>
+    <tr><th>연도</th><th>'11</th><th>'12</th><th>'13</th><th>'14</th><th>'15</th><th>'16</th><th>'17</th><th>'18</th><th>'19</th><th>'20</th></tr>
+    <tr><th>코드</th><td>C</td><td>D</td><td>F</td><td>G</td><td>H</td><td>J</td><td>K</td><td>L</td><td>M</td><td>N</td></tr>
+    <tr><th>연도</th><th>'21</th><th>'22</th><th>'23</th><th>'24</th><th>'25</th><th>'26</th><th>'27</th><th>'28</th><th>'29</th><th></th></tr>
+    <tr><th>코드</th><td>P</td><td>Q</td><td>R</td><td>S</td><td>T</td><td>V</td><td>W</td><td>X</td><td>Y</td><td></td></tr>
+  </table>
+  <div class="ref-table-title" style="margin-top:8px;">📆 월 코드</div>
+  <table class="ref-table">
+    <tr><th>월</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr>
+    <tr><th>코드</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>B</td><td>C</td><td>D</td></tr>
+  </table>
+  <div class="ref-table-title" style="margin-top:8px;">📋 일 코드 (0 = 1일)</div>
+  <table class="ref-table">
+    <tr><th>일</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th></tr>
+    <tr><th>코드</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>B</td><td>C</td><td>D</td><td>F</td><td>G</td><td>H</td></tr>
+    <tr><th>일</th><th>17</th><th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th><th>24</th><th>25</th><th>26</th><th>27</th><th>28</th><th>29</th><th>30</th><th>31</th><th></th></tr>
+    <tr><th>코드</th><td>J</td><td>K</td><td>L</td><td>M</td><td>N</td><td>P</td><td>Q</td><td>R</td><td>S</td><td>T</td><td>V</td><td>W</td><td>X</td><td>Y</td><td>Z</td><td></td></tr>
   </table>
 
-  <div class="ref-table-title" style="margin-top:12px;">📆 월 코드표</div>
+  <div class="ref-section-divider"></div>
+
+  <!-- ━━━ 섹션 2: 25자리 ━━━ -->
+  <div class="ref-section-header">② 25자리 시리얼 (E-PASS Label)</div>
+  <div class="ref-section-pos">CN XXXXXXXXXXXXXXXX <b style="color:#0096D6;text-decoration:underline;">Y M D</b> XXXX → <b>19·20·21</b>번째</div>
+
+  <div class="ref-table-title">📅 연도 코드 (2011~2030)</div>
   <table class="ref-table">
-    <tr>
-      <th>월</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
-    </tr>
-    <tr>
-      <th>코드</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>B</td><td>C</td><td>D</td>
-    </tr>
+    <tr><th>연도</th><th>'11</th><th>'12</th><th>'13</th><th>'14</th><th>'15</th><th>'16</th><th>'17</th><th>'18</th><th>'19</th><th>'20</th></tr>
+    <tr><th>코드</th><td>B</td><td>C</td><td>D</td><td>F</td><td>G</td><td>H</td><td>J</td><td>K</td><td>M</td><td>N</td></tr>
+    <tr><th>연도</th><th>'21</th><th>'22</th><th>'23</th><th>'24</th><th>'25</th><th>'26</th><th>'27</th><th>'28</th><th>'29</th><th>'30</th></tr>
+    <tr><th>코드</th><td>R</td><td>T</td><td>W</td><td>X</td><td>Y</td><td>L</td><td>P</td><td>Q</td><td>S</td><td>Z</td></tr>
+  </table>
+  <div class="ref-table-title" style="margin-top:8px;">📆 월 코드</div>
+  <table class="ref-table">
+    <tr><th>월</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr>
+    <tr><th>코드</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td></tr>
+  </table>
+  <div class="ref-table-title" style="margin-top:8px;">📋 일 코드</div>
+  <table class="ref-table">
+    <tr><th>일</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th></tr>
+    <tr><th>코드</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td><td>G</td></tr>
+    <tr><th>일</th><th>17</th><th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th><th>24</th><th>25</th><th>26</th><th>27</th><th>28</th><th>29</th><th>30</th><th>31</th><th></th></tr>
+    <tr><th>코드</th><td>H</td><td>I</td><td>J</td><td>K</td><td>L</td><td>M</td><td>N</td><td>O</td><td>P</td><td>Q</td><td>R</td><td>S</td><td>T</td><td>U</td><td>V</td><td></td></tr>
   </table>
 
-  <div class="ref-table-title" style="margin-top:12px;">📋 일 코드표 (1~31)</div>
+  <div class="ref-section-divider"></div>
+
+  <!-- ━━━ 섹션 3: 14자리 ━━━ -->
+  <div class="ref-section-header">③ 14자리 시리얼 (New Format)</div>
+  <div class="ref-section-pos">CN <b style="color:#0096D6;text-decoration:underline;">Y M D</b> XXXXXXXXX → <b>3·4·5</b>번째</div>
+
+  <div class="ref-table-title">📅 연도 코드 (2020~2029)</div>
   <table class="ref-table">
-    <tr>
-      <th>일</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th>
-    </tr>
-    <tr>
-      <th>코드</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td><td>D</td><td>F</td><td>G</td><td>H</td>
-    </tr>
-    <tr>
-      <th>일</th><th>17</th><th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th><th>24</th><th>25</th><th>26</th><th>27</th><th>28</th><th>29</th><th>30</th><th>31</th><th></th>
-    </tr>
-    <tr>
-      <th>코드</th><td>J</td><td>K</td><td>L</td><td>M</td><td>N</td><td>P</td><td>Q</td><td>R</td><td>S</td><td>T</td><td>V</td><td>W</td><td>X</td><td>Y</td><td>Z</td><td></td>
-    </tr>
+    <tr><th>연도</th><th>'20</th><th>'21</th><th>'22</th><th>'23</th><th>'24</th><th>'25</th><th>'26</th><th>'27</th><th>'28</th><th>'29</th></tr>
+    <tr><th>코드</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr>
   </table>
+  <div class="ref-table-title" style="margin-top:8px;">📆 월 코드</div>
+  <table class="ref-table">
+    <tr><th>월</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr>
+    <tr><th>코드</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td></tr>
+  </table>
+  <div class="ref-table-title" style="margin-top:8px;">📋 일 코드</div>
+  <table class="ref-table">
+    <tr><th>일</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th></tr>
+    <tr><th>코드</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td><td>G</td></tr>
+    <tr><th>일</th><th>17</th><th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th><th>24</th><th>25</th><th>26</th><th>27</th><th>28</th><th>29</th><th>30</th><th>31</th><th></th></tr>
+    <tr><th>코드</th><td>H</td><td>I</td><td>J</td><td>K</td><td>L</td><td>M</td><td>N</td><td>O</td><td>P</td><td>Q</td><td>R</td><td>S</td><td>T</td><td>U</td><td>V</td><td></td></tr>
+  </table>
+
 </div>
 
 <input type="file" id="cameraInput" accept="image/*" capture="environment">
@@ -973,48 +1236,76 @@
 <div class="bottom-spacer"></div>
 <div class="footer">Made by <span>KSH</span></div>
 
+<!-- 바코드/QR 코드 리더 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <!-- Tesseract.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<!-- 바코드 리더 숨김 컨테이너 -->
+<div id="barcodeReader" style="display:none;width:0;height:0;overflow:hidden;"></div>
 
 <script>
-// ========== 코딩 테이블 ==========
-// 연도 코드: 같은 문자가 10년 주기로 반복됨
-// 2021~2030 우선 적용 (현재 시점 기준), 매칭 안 되면 2031~2040, 2010~2020 순
-const YEAR_CYCLE_1 = { // 2021~2030
-  'R': 2021, 'T': 2022, 'W': 2023, 'X': 2024, 'Y': 2025,
-  'L': 2026, 'P': 2027, 'Q': 2028, 'S': 2029, 'Z': 2030
+// ========== 코딩 테이블 (3가지 형식별 개별 규칙) ==========
+
+// ── 10자리 Code ── (위치: 5·6·7번째)
+const YEAR_10 = {
+  'C':2011,'D':2012,'F':2013,'G':2014,'H':2015,'J':2016,'K':2017,'L':2018,'M':2019,'N':2020,
+  'P':2021,'Q':2022,'R':2023,'S':2024,'T':2025,'V':2026,'W':2027,'X':2028,'Y':2029
 };
-const YEAR_CYCLE_2 = { // 2031~2040
-  'B': 2031, 'C': 2032, 'D': 2033, 'F': 2034, 'G': 2035,
-  'H': 2036, 'J': 2037, 'K': 2038, 'M': 2039, 'N': 2040
+const MONTH_10 = {
+  '1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'B':10,'C':11,'D':12
 };
-const YEAR_CYCLE_0 = { // 2010~2020
-  'B': 2010, 'C': 2011, 'D': 2012, 'F': 2013, 'G': 2014,
-  'H': 2015, 'J': 2016, 'K': 2017, 'L': 2018, 'M': 2019, 'N': 2020
+const DAY_10 = {
+  '0':1,'1':2,'2':3,'3':4,'4':5,'5':6,'6':7,'7':8,'8':9,'9':10,
+  'B':11,'C':12,'D':13,'F':14,'G':15,'H':16,'J':17,'K':18,'L':19,'M':20,
+  'N':21,'P':22,'Q':23,'R':24,'S':25,'T':26,'V':27,'W':28,'X':29,'Y':30,'Z':31
 };
 
-function decodeYear(ch) {
-  // 우선순위: 2021~2030 → 2031~2040 → 2010~2020
-  if (YEAR_CYCLE_1[ch]) return YEAR_CYCLE_1[ch];
-  if (YEAR_CYCLE_2[ch]) return YEAR_CYCLE_2[ch];
-  if (YEAR_CYCLE_0[ch]) return YEAR_CYCLE_0[ch];
-  return null;
+// ── 25자리 Code ── (위치: 19·20·21번째)
+const YEAR_25 = {
+  'B':2011,'C':2012,'D':2013,'F':2014,'G':2015,'H':2016,'J':2017,'K':2018,'M':2019,'N':2020,
+  'R':2021,'T':2022,'W':2023,'X':2024,'Y':2025,'L':2026,'P':2027,'Q':2028,'S':2029,'Z':2030
+};
+const MONTH_25 = {
+  '1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'A':10,'B':11,'C':12
+};
+const DAY_25 = {
+  '1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,
+  'A':10,'B':11,'C':12,'D':13,'E':14,'F':15,'G':16,'H':17,'I':18,'J':19,'K':20,
+  'L':21,'M':22,'N':23,'O':24,'P':25,'Q':26,'R':27,'S':28,'T':29,'U':30,'V':31
+};
+
+// ── 14자리 Code ── (위치: 3·4·5번째)
+const YEAR_14 = {
+  '0':2020,'1':2021,'2':2022,'3':2023,'4':2024,'5':2025,'6':2026,'7':2027,'8':2028,'9':2029
+};
+const MONTH_14 = {
+  '1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'A':10,'B':11,'C':12
+};
+const DAY_14 = {
+  '1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,
+  'A':10,'B':11,'C':12,'D':13,'E':14,'F':15,'G':16,'H':17,'I':18,'J':19,'K':20,
+  'L':21,'M':22,'N':23,'O':24,'P':25,'Q':26,'R':27,'S':28,'T':29,'U':30,'V':31
+};
+
+// 형식별 테이블 매핑
+const CODE_TABLES = {
+  '10자리': { year: YEAR_10, month: MONTH_10, day: DAY_10 },
+  '25자리': { year: YEAR_25, month: MONTH_25, day: DAY_25 },
+  '14자리': { year: YEAR_14, month: MONTH_14, day: DAY_14 }
+};
+
+function decodeYear(ch, type) {
+  const table = CODE_TABLES[type];
+  return table ? (table.year[ch] || null) : null;
 }
-
-const MONTH_CODE = {
-  '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
-  '7': 7, '8': 8, '9': 9, 'B': 10, 'C': 11, 'D': 12
-};
-
-// Day 코드: 사진 테이블 기준 (10=A 포함, E/I/O/U 제외)
-// 1~9 → 1~9, 10=A, 11=B, 12=C, 13=D, 14=F, 15=G, 16=H, 17=J, 18=K,
-// 19=L, 20=M, 21=N, 22=P, 23=Q, 24=R, 25=S, 26=T, 27=V, 28=W, 29=X, 30=Y, 31=Z
-const DAY_CODE_V2 = {
-  '1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,
-  'A':10, 'B':11, 'C':12, 'D':13, 'F':14, 'G':15, 'H':16, 'J':17,
-  'K':18, 'L':19, 'M':20, 'N':21, 'P':22, 'Q':23, 'R':24, 'S':25,
-  'T':26, 'V':27, 'W':28, 'X':29, 'Y':30, 'Z':31
-};
+function decodeMonth(ch, type) {
+  const table = CODE_TABLES[type];
+  return table ? (table.month[ch] || null) : null;
+}
+function decodeDay(ch, type) {
+  const table = CODE_TABLES[type];
+  return table ? (table.day[ch] || null) : null;
+}
 
 const MONTH_NAMES = ['', '1월', '2월', '3월', '4월', '5월', '6월',
                      '7월', '8월', '9월', '10월', '11월', '12월'];
@@ -1024,8 +1315,8 @@ function parseSerial(raw) {
   const s = raw.replace(/[\s\-]/g, '').toUpperCase();
   const len = s.length;
 
-  if (len !== 10 && len !== 25) {
-    return { error: true, msg: `시리얼은 10자리 또는 25자리여야 합니다. (입력: ${len}자리)` };
+  if (len !== 10 && len !== 25 && len !== 14) {
+    return { error: true, msg: `시리얼은 10자리, 14자리 또는 25자리여야 합니다. (입력: ${len}자리)` };
   }
 
   let yearChar, monthChar, dayChar;
@@ -1036,25 +1327,30 @@ function parseSerial(raw) {
     yearChar = s[4];   // 5번째
     monthChar = s[5];  // 6번째
     dayChar = s[6];    // 7번째
-  } else {
+  } else if (len === 25) {
     serialType = '25자리';
     yearChar = s[18];  // 19번째
     monthChar = s[19]; // 20번째
     dayChar = s[20];   // 21번째
+  } else {
+    serialType = '14자리';
+    yearChar = s[2];   // 3번째
+    monthChar = s[3];  // 4번째
+    dayChar = s[4];    // 5번째
   }
 
-  const year = decodeYear(yearChar);
-  const month = MONTH_CODE[monthChar];
-  const day = DAY_CODE_V2[dayChar];
+  const year = decodeYear(yearChar, serialType);
+  const month = decodeMonth(monthChar, serialType);
+  const day = decodeDay(dayChar, serialType);
 
   if (!year) {
-    return { error: true, msg: `연도 코드 '${yearChar}' 를 인식할 수 없습니다.` };
+    return { error: true, msg: `[${serialType}] 연도 코드 '${yearChar}' 를 인식할 수 없습니다.` };
   }
   if (!month) {
-    return { error: true, msg: `월 코드 '${monthChar}' 를 인식할 수 없습니다.` };
+    return { error: true, msg: `[${serialType}] 월 코드 '${monthChar}' 를 인식할 수 없습니다.` };
   }
   if (!day) {
-    return { error: true, msg: `일 코드 '${dayChar}' 를 인식할 수 없습니다.` };
+    return { error: true, msg: `[${serialType}] 일 코드 '${dayChar}' 를 인식할 수 없습니다.` };
   }
 
   const dateStr = `${year}.${String(month).padStart(2,'0')}.${String(day).padStart(2,'0')}`;
@@ -1118,26 +1414,161 @@ const SIMILAR_CHARS = {
   '0': ['0','O','D','Q'],
 };
 
-// 특정 코드 유형에 대한 유효 문자만 필터링
-function getCandidates(ch, type) {
+// OCR 인식 이미지 확대/축소 토글
+function toggleOcrZoom(imgEl) {
+  imgEl.classList.toggle('zoomed');
+}
+
+// 특정 코드 유형 + 시리얼 형식에 대한 유효 문자만 필터링
+function getCandidates(ch, type, serialType) {
   const similar = SIMILAR_CHARS[ch] || [ch];
-  // ch 자체 + 유사 문자를 합치되 중복 제거
   const allCandidates = [ch, ...similar.filter(c => c !== ch)];
 
+  const tables = CODE_TABLES[serialType];
+  if (!tables) return allCandidates;
+
   if (type === 'year') {
-    // 연도 코드에 유효한 문자만
-    const allYears = { ...YEAR_CYCLE_1, ...YEAR_CYCLE_2, ...YEAR_CYCLE_0 };
-    return allCandidates.filter(c => allYears[c]);
+    return allCandidates.filter(c => tables.year[c]);
   } else if (type === 'month') {
-    return allCandidates.filter(c => MONTH_CODE[c]);
+    return allCandidates.filter(c => tables.month[c]);
   } else if (type === 'day') {
-    return allCandidates.filter(c => DAY_CODE_V2[c]);
+    return allCandidates.filter(c => tables.day[c]);
   }
   return allCandidates;
 }
 
 // 현재 결과 상태 (사용자 보정에 사용)
 let currentResultState = null;
+// OCR 인식에 사용된 원본 이미지 (크롭된 캔버스의 dataURL)
+let lastOcrImageDataUrl = null;
+let lastOcrData = null;    // Tesseract 인식 결과 (바운딩박스)
+let lastOcrCanvas = null;  // OCR에 사용된 캔버스
+let lastBarcodeSerial = null;  // 바코드 인식 결과 (있을 때만)
+let lastOcrSerial = null;      // OCR 문자 인식 결과 (있을 때만)
+
+// OCR 결과에서 시리얼 텍스트 영역만 크롭 + YMD 붉은 밑줄 오버레이
+function buildCroppedSerialPreview(srcCanvas, ocrData, serial) {
+  try {
+    const sLen = serial.length;
+
+    // YMD 위치 (0-indexed)
+    let ymdStart, ymdEnd;
+    if (sLen === 10)      { ymdStart = 4; ymdEnd = 7; }
+    else if (sLen === 14) { ymdStart = 2; ymdEnd = 5; }
+    else if (sLen === 25) { ymdStart = 18; ymdEnd = 21; }
+    else                  { ymdStart = 0; ymdEnd = sLen; }
+
+    // Tesseract words에서 시리얼이 포함된 줄의 바운딩박스 찾기
+    let bestLine = null;
+    let bestSymbols = null;
+
+    if (ocrData && ocrData.lines) {
+      for (const line of ocrData.lines) {
+        const lineText = line.text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+        if (lineText.includes(serial.slice(0, 6))) {
+          bestLine = line.bbox;
+          // 심볼 레벨 바운딩 박스 수집 (글자 하나하나)
+          const symbols = [];
+          for (const word of line.words) {
+            for (const sym of (word.symbols || [])) {
+              symbols.push(sym);
+            }
+          }
+          bestSymbols = symbols;
+          break;
+        }
+      }
+    }
+
+    const cW = srcCanvas.width;
+    const cH = srcCanvas.height;
+
+    // 크롭 영역 결정
+    let cropX, cropY, cropW, cropH;
+    if (bestLine) {
+      const lineH = bestLine.y1 - bestLine.y0;
+      const lineW = bestLine.x1 - bestLine.x0;
+      const padY = Math.round(lineH * 0.6);            // 상하 여백
+      const padX = Math.round(Math.max(lineW * 0.15, lineH * 1.0)); // 좌우 여백 넉넉하게
+      cropX = Math.max(0, bestLine.x0 - padX);
+      cropY = Math.max(0, bestLine.y0 - padY);
+      cropW = Math.min(cW - cropX, lineW + padX * 2);
+      cropH = Math.min(cH - cropY, lineH + padY * 2);
+    } else {
+      // 바운딩박스 못 찾으면 중앙 50% 크롭
+      cropX = Math.round(cW * 0.05);
+      cropY = Math.round(cH * 0.25);
+      cropW = Math.round(cW * 0.9);
+      cropH = Math.round(cH * 0.5);
+    }
+
+    // 크롭 캔버스 생성
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = cropW;
+    cropCanvas.height = cropH;
+    const cropCtx = cropCanvas.getContext('2d');
+    cropCtx.drawImage(srcCanvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+    // YMD 영역에 붉은 밑줄 그리기
+    // 심볼 바운딩박스 사용 or 글자 수 비율로 추정
+    let ulX0, ulX1, ulY;
+
+    if (bestSymbols && bestSymbols.length > 0) {
+      // 시리얼 문자열과 심볼을 매칭하여 위치 추정
+      // 라인 내 알파벳/숫자 심볼만 필터
+      const alphaSyms = bestSymbols.filter(sym => /[A-Z0-9]/i.test(sym.text));
+      
+      // CN으로 시작하는 위치 찾기
+      let cnIdx = -1;
+      for (let i = 0; i <= alphaSyms.length - sLen; i++) {
+        const chunk = alphaSyms.slice(i, i + Math.min(4, sLen)).map(s => s.text).join('').toUpperCase();
+        if (chunk.startsWith(serial.slice(0, Math.min(4, sLen)))) {
+          cnIdx = i;
+          break;
+        }
+      }
+
+      if (cnIdx >= 0 && cnIdx + ymdEnd <= alphaSyms.length) {
+        const symStart = alphaSyms[cnIdx + ymdStart];
+        const symEnd = alphaSyms[cnIdx + ymdEnd - 1];
+        ulX0 = symStart.bbox.x0 - cropX;
+        ulX1 = symEnd.bbox.x1 - cropX;
+        ulY = symEnd.bbox.y1 - cropY;
+      }
+    }
+
+    // 심볼 매칭 실패 시 비율로 추정
+    if (ulX0 === undefined) {
+      const lineLeft = bestLine ? bestLine.x0 - cropX : 0;
+      const lineWidth = bestLine ? (bestLine.x1 - bestLine.x0) : cropW;
+      const charWidth = lineWidth / sLen;
+      ulX0 = lineLeft + charWidth * ymdStart;
+      ulX1 = lineLeft + charWidth * ymdEnd;
+      ulY = cropH * 0.78;
+    }
+
+    // 붉은 밑줄 그리기
+    const lineThickness = Math.max(3, Math.round(cropH * 0.06));
+    cropCtx.strokeStyle = 'rgba(220, 38, 38, 0.85)';
+    cropCtx.lineWidth = lineThickness;
+    cropCtx.lineCap = 'round';
+    cropCtx.beginPath();
+    cropCtx.moveTo(ulX0, ulY + 2);
+    cropCtx.lineTo(ulX1, ulY + 2);
+    cropCtx.stroke();
+
+    // 반투명 배경 하이라이트 (밑줄 위)
+    cropCtx.fillStyle = 'rgba(220, 38, 38, 0.10)';
+    const hlTop = bestLine ? (bestLine.y0 - cropY) : 0;
+    cropCtx.fillRect(ulX0, hlTop, ulX1 - ulX0, ulY + 2 - hlTop);
+
+    return cropCanvas.toDataURL('image/jpeg', 0.9);
+  } catch (e) {
+    console.warn('[크롭 미리보기 실패]', e);
+    // 폴백: 전체 캔버스 이미지
+    return srcCanvas.toDataURL('image/jpeg', 0.85);
+  }
+}
 
 function showResult(result, isFromOCR = false) {
   const card = document.getElementById('resultCard');
@@ -1158,14 +1589,17 @@ function showResult(result, isFromOCR = false) {
     serialHtml = `<span style="color:#fff;font-weight:700;text-decoration:underline">${s}</span>`;
   } else if (result.serialType === '10자리') {
     serialHtml = `${s.slice(0,4)}<span style="color:#fff;font-weight:700;text-decoration:underline">${s.slice(4,7)}</span>${s.slice(7)}`;
+  } else if (result.serialType === '14자리') {
+    serialHtml = `${s.slice(0,2)}<span style="color:#fff;font-weight:700;text-decoration:underline">${s.slice(2,5)}</span>${s.slice(5)}`;
   } else {
     serialHtml = `${s.slice(0,18)}<span style="color:#fff;font-weight:700;text-decoration:underline">${s.slice(18,21)}</span>${s.slice(21)}`;
   }
 
-  // 유사 문자 후보 생성
-  const yearCandidates = getCandidates(result.yearChar, 'year');
-  const monthCandidates = getCandidates(result.monthChar, 'month');
-  const dayCandidates = getCandidates(result.dayChar, 'day');
+  // 유사 문자 후보 생성 (시리얼 형식에 따라 유효 문자 필터링)
+  const sType = result.serialType === '코드 3자리' ? (currentResultState && currentResultState.dcFormat || '10자리') : result.serialType;
+  const yearCandidates = getCandidates(result.yearChar, 'year', sType);
+  const monthCandidates = getCandidates(result.monthChar, 'month', sType);
+  const dayCandidates = getCandidates(result.dayChar, 'day', sType);
 
   // 후보가 2개 이상인 코드가 있으면 선택 UI 표시
   const hasAmbiguity = isFromOCR && (yearCandidates.length > 1 || monthCandidates.length > 1 || dayCandidates.length > 1);
@@ -1174,9 +1608,9 @@ function showResult(result, isFromOCR = false) {
   function makeOptions(candidates, currentChar, type) {
     return candidates.map(c => {
       let decoded = '';
-      if (type === 'year') decoded = decodeYear(c) + '년';
-      else if (type === 'month') decoded = MONTH_CODE[c] + '월';
-      else if (type === 'day') decoded = DAY_CODE_V2[c] + '일';
+      if (type === 'year') decoded = decodeYear(c, sType) + '년';
+      else if (type === 'month') decoded = decodeMonth(c, sType) + '월';
+      else if (type === 'day') decoded = decodeDay(c, sType) + '일';
 
       const isSelected = c === currentChar ? 'selected' : '';
       const isOriginal = c === currentChar ? 'ocr-original' : '';
@@ -1210,11 +1644,55 @@ function showResult(result, isFromOCR = false) {
     `;
   }
 
+  // OCR 이미지 미리보기 (이미지가 있으면 항상 표시)
+  let ocrPreviewHtml = '';
+  if (lastOcrImageDataUrl) {
+    ocrPreviewHtml = `
+      <div class="ocr-preview-section">
+        <div class="ocr-preview-label">📷 인식된 이미지 (<span class="ymd-mark"></span> = 연·월·일)</div>
+        <div class="ocr-preview-wrap">
+          <img src="${lastOcrImageDataUrl}" class="ocr-preview-img" alt="OCR 크롭" onclick="toggleOcrZoom(this)">
+        </div>
+        <div class="ocr-preview-hint">인식된 문자가 맞는지 확인하세요 · 탭하여 확대</div>
+      </div>
+    `;
+  }
+
+  // 바코드/OCR 인식 출처 표시
+  let sourceHtml = '';
+  if (lastBarcodeSerial || lastOcrSerial) {
+    let rows = '';
+    const bothExist = lastBarcodeSerial && lastOcrSerial;
+    const isDifferent = bothExist && lastBarcodeSerial !== lastOcrSerial;
+
+    if (lastBarcodeSerial) {
+      rows += `
+        <div class="source-row">
+          <span class="source-badge barcode">바코드</span>
+          <span class="source-serial active">${lastBarcodeSerial}</span>
+          <span class="source-label">✅ 채택</span>
+        </div>`;
+    }
+    if (lastOcrSerial) {
+      rows += `
+        <div class="source-row">
+          <span class="source-badge ocr">문자(OCR)</span>
+          <span class="source-serial ${isDifferent ? 'muted' : (!lastBarcodeSerial ? 'active' : '')}">${lastOcrSerial}</span>
+          ${isDifferent ? '<span class="source-label" style="color:#dc2626;">⚠️ 불일치</span>' : (!lastBarcodeSerial ? '<span class="source-label">✅ 채택</span>' : '')}
+        </div>`;
+    }
+    if (rows) {
+      sourceHtml = `<div class="recognition-source">${rows}</div>`;
+    }
+  }
+
   card.innerHTML = `
     <div class="result-header">
       <span class="badge">${result.serialType}</span>
       <span class="serial-text" id="resultSerialText">${serialHtml}</span>
     </div>
+    ${sourceHtml}
+    ${ocrPreviewHtml}
     <div class="date-display" id="resultDateDisplay">
       <div class="label">생 산 일 자</div>
       <div class="date" id="resultDate">${result.dateStr}</div>
@@ -1237,7 +1715,7 @@ function showResult(result, isFromOCR = false) {
       </div>
       <div class="detail-row">
         <span class="key">시리얼 타입</span>
-        <span class="val">${result.serialType}${result.serialType === '10자리' ? ' (HPPS Code)' : result.serialType === '25자리' ? ' (E-PASS Label)' : ' (YMD 직접 입력)'}</span>
+        <span class="val">${result.serialType}${result.serialType === '10자리' ? ' (HPPS Code)' : result.serialType === '25자리' ? ' (E-PASS Label)' : result.serialType === '14자리' ? ' (New Format)' : ' (YMD 직접 입력)'}</span>
       </div>
     </div>
   `;
@@ -1267,6 +1745,8 @@ function pickChar(btn) {
     currentResultState.yearChar = char;
     if (currentResultState.serialType === '10자리') {
       newSerial = s.slice(0,4) + char + s.slice(5);
+    } else if (currentResultState.serialType === '14자리') {
+      newSerial = s.slice(0,2) + char + s.slice(3);
     } else {
       newSerial = s.slice(0,18) + char + s.slice(19);
     }
@@ -1274,6 +1754,8 @@ function pickChar(btn) {
     currentResultState.monthChar = char;
     if (currentResultState.serialType === '10자리') {
       newSerial = s.slice(0,5) + char + s.slice(6);
+    } else if (currentResultState.serialType === '14자리') {
+      newSerial = s.slice(0,3) + char + s.slice(4);
     } else {
       newSerial = s.slice(0,19) + char + s.slice(20);
     }
@@ -1281,6 +1763,8 @@ function pickChar(btn) {
     currentResultState.dayChar = char;
     if (currentResultState.serialType === '10자리') {
       newSerial = s.slice(0,6) + char + s.slice(7);
+    } else if (currentResultState.serialType === '14자리') {
+      newSerial = s.slice(0,4) + char + s.slice(5);
     } else {
       newSerial = s.slice(0,20) + char + s.slice(21);
     }
@@ -1288,10 +1772,11 @@ function pickChar(btn) {
 
   currentResultState.serial = newSerial;
 
-  // 디코드
-  const year = decodeYear(currentResultState.yearChar);
-  const month = MONTH_CODE[currentResultState.monthChar];
-  const day = DAY_CODE_V2[currentResultState.dayChar];
+  // 디코드 (형식에 맞는 테이블 사용)
+  const st = currentResultState.serialType === '코드 3자리' ? (currentResultState.dcFormat || '10자리') : currentResultState.serialType;
+  const year = decodeYear(currentResultState.yearChar, st);
+  const month = decodeMonth(currentResultState.monthChar, st);
+  const day = decodeDay(currentResultState.dayChar, st);
 
   if (year) currentResultState.year = year;
   if (month) currentResultState.month = month;
@@ -1330,6 +1815,8 @@ function pickChar(btn) {
     const ns = currentResultState.serial;
     if (currentResultState.serialType === '10자리') {
       serialTextEl.innerHTML = `${ns.slice(0,4)}<span style="color:#fff;font-weight:700;text-decoration:underline">${ns.slice(4,7)}</span>${ns.slice(7)}`;
+    } else if (currentResultState.serialType === '14자리') {
+      serialTextEl.innerHTML = `${ns.slice(0,2)}<span style="color:#fff;font-weight:700;text-decoration:underline">${ns.slice(2,5)}</span>${ns.slice(5)}`;
     } else {
       serialTextEl.innerHTML = `${ns.slice(0,18)}<span style="color:#fff;font-weight:700;text-decoration:underline">${ns.slice(18,21)}</span>${ns.slice(21)}`;
     }
@@ -1348,6 +1835,10 @@ function checkSerial() {
     alert('시리얼 번호를 입력해주세요.');
     return;
   }
+  // 수동 입력 시 바코드/OCR 상태 초기화
+  lastBarcodeSerial = null;
+  lastOcrSerial = null;
+  lastOcrImageDataUrl = null;
   const result = parseSerial(input);
   showResult(result, false); // 수동 입력 — 후보 선택 불필요
 }
@@ -1359,7 +1850,7 @@ function toggleDatecodeInput() {
   btn.classList.toggle('open');
   section.classList.toggle('active');
   if (section.classList.contains('active')) {
-    document.getElementById('dcYear').focus();
+    document.getElementById('dc10Y').focus();
   }
 }
 
@@ -1371,23 +1862,27 @@ function datecodeAutoNext(current, nextId) {
   }
 }
 
-function checkDatecode() {
-  const yc = document.getElementById('dcYear').value.trim().toUpperCase();
-  const mc = document.getElementById('dcMonth').value.trim().toUpperCase();
-  const dc = document.getElementById('dcDay').value.trim().toUpperCase();
+let selectedDcFormat = '10자리';
+
+function checkDatecode(format, yId, mId, dId) {
+  const yc = document.getElementById(yId).value.trim().toUpperCase();
+  const mc = document.getElementById(mId).value.trim().toUpperCase();
+  const dc = document.getElementById(dId).value.trim().toUpperCase();
+
+  selectedDcFormat = format;
 
   if (!yc || !mc || !dc) {
     alert('연도(Y), 월(M), 일(D) 코드를 모두 입력해주세요.');
     return;
   }
 
-  const year = decodeYear(yc);
-  const month = MONTH_CODE[mc];
-  const day = DAY_CODE_V2[dc];
+  const year = decodeYear(yc, format);
+  const month = decodeMonth(mc, format);
+  const day = decodeDay(dc, format);
 
-  if (!year) { alert(`연도 코드 '${yc}' 를 인식할 수 없습니다.`); return; }
-  if (!month) { alert(`월 코드 '${mc}' 를 인식할 수 없습니다.`); return; }
-  if (!day) { alert(`일 코드 '${dc}' 를 인식할 수 없습니다.`); return; }
+  if (!year) { alert(`[${format}] 연도 코드 '${yc}' 를 인식할 수 없습니다.`); return; }
+  if (!month) { alert(`[${format}] 월 코드 '${mc}' 를 인식할 수 없습니다.`); return; }
+  if (!day) { alert(`[${format}] 일 코드 '${dc}' 를 인식할 수 없습니다.`); return; }
 
   const dateStr = `${year}.${String(month).padStart(2,'0')}.${String(day).padStart(2,'0')}`;
   const dayOfWeek = getDayOfWeek(year, month, day);
@@ -1396,6 +1891,7 @@ function checkDatecode() {
     error: false,
     serial: yc + mc + dc,
     serialType: '코드 3자리',
+    dcFormat: selectedDcFormat,
     year, month, day,
     yearChar: yc, monthChar: mc, dayChar: dc,
     dateStr,
@@ -1411,10 +1907,17 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('serialInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') checkSerial();
   });
-  // 날짜코드 입력 Enter 키
-  ['dcYear','dcMonth','dcDay'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') checkDatecode();
+  // 날짜코드 입력 Enter 키 (3가지 형식 각각)
+  const dcRows = [
+    { ids: ['dc10Y','dc10M','dc10D'], fmt: '10자리' },
+    { ids: ['dc25Y','dc25M','dc25D'], fmt: '25자리' },
+    { ids: ['dc14Y','dc14M','dc14D'], fmt: '14자리' }
+  ];
+  dcRows.forEach(row => {
+    row.ids.forEach(id => {
+      document.getElementById(id).addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') checkDatecode(row.fmt, row.ids[0], row.ids[1], row.ids[2]);
+      });
     });
   });
   loadHistory();
@@ -1865,10 +2368,14 @@ function extractCNSerial(ocrText) {
       const stripped = lineClean.replace(/^.*?(CN)/, '$1');
       const m25 = stripped.match(/^CN[A-Z0-9]{23}/);
       if (m25) { foundSerial = m25[0]; break; }
+      const m14 = stripped.match(/^CN[A-Z0-9]{12}/);
+      if (m14) { foundSerial = m14[0]; break; }
       const m10 = stripped.match(/^CN[A-Z0-9]{8}/);
       if (m10) { foundSerial = m10[0]; break; }
       const f25 = lineClean.match(/CN[A-Z0-9]{23}/);
       if (f25) { foundSerial = f25[0]; break; }
+      const f14 = lineClean.match(/CN[A-Z0-9]{12}/);
+      if (f14) { foundSerial = f14[0]; break; }
       const f10 = lineClean.match(/CN[A-Z0-9]{8}/);
       if (f10) { foundSerial = f10[0]; break; }
     }
@@ -1884,6 +2391,11 @@ function extractCNSerial(ocrText) {
   }
   if (!foundSerial) {
     for (const w of words) {
+      if (w.length === 14 && w.startsWith('CN')) { foundSerial = w; break; }
+    }
+  }
+  if (!foundSerial) {
+    for (const w of words) {
       if (w.length === 10 && w.startsWith('CN')) { foundSerial = w; break; }
     }
   }
@@ -1893,6 +2405,8 @@ function extractCNSerial(ocrText) {
   const allText = cleanText.replace(/\s+/g, '');
   const match25 = allText.match(/CN[A-Z0-9]{23}/);
   if (match25) { console.log('[2단계-연결25]', match25[0]); return match25[0]; }
+  const match14 = allText.match(/CN[A-Z0-9]{12}/);
+  if (match14) { console.log('[2단계-연결14]', match14[0]); return match14[0]; }
   const match10 = allText.match(/CN[A-Z0-9]{8}/);
   if (match10) { console.log('[2단계-연결10]', match10[0]); return match10[0]; }
 
@@ -1902,16 +2416,19 @@ function extractCNSerial(ocrText) {
       const lineClean = fixOcrString(line.replace(/[^A-Z0-9]/gi, '').toUpperCase());
       const m25 = lineClean.match(/CN[A-Z0-9]{23}/);
       if (m25) { console.log('[3단계-줄25]', m25[0]); return m25[0]; }
+      const m14 = lineClean.match(/CN[A-Z0-9]{12}/);
+      if (m14) { console.log('[3단계-줄14]', m14[0]); return m14[0]; }
       const m10 = lineClean.match(/CN[A-Z0-9]{8}/);
       if (m10) { console.log('[3단계-줄10]', m10[0]); return m10[0]; }
     }
   }
 
   // ===== 4단계: OCR 오인식 보정 후 재시도 =====
-  // 기울어진 이미지에서 C/N이 다른 문자로 인식되는 경우
   const fixedAllText = fixOcrString(allText);
   const fm25 = fixedAllText.match(/CN[A-Z0-9]{23}/);
   if (fm25) { console.log('[4단계-보정전체25]', fm25[0]); return fm25[0]; }
+  const fm14 = fixedAllText.match(/CN[A-Z0-9]{12}/);
+  if (fm14) { console.log('[4단계-보정전체14]', fm14[0]); return fm14[0]; }
   const fm10 = fixedAllText.match(/CN[A-Z0-9]{8}/);
   if (fm10) { console.log('[4단계-보정전체10]', fm10[0]); return fm10[0]; }
 
@@ -1933,6 +2450,15 @@ function extractCNSerial(ocrText) {
         return candidate;
       }
     }
+    // 14자리 시도
+    if (pos + 14 <= searchText.length) {
+      const raw14 = searchText.slice(pos, pos + 14);
+      const candidate = 'CN' + fixOcrString(raw14.slice(2));
+      if (/^CN[A-Z0-9]{12}$/.test(candidate)) {
+        console.log('[5단계-보정14]', candidate, `(원본: ${raw14.slice(0,4)}...)`);
+        return candidate;
+      }
+    }
     // 10자리 시도
     if (pos + 10 <= searchText.length) {
       const raw10 = searchText.slice(pos, pos + 10);
@@ -1951,6 +2477,8 @@ function extractCNSerial(ocrText) {
     const fixedLine = fixOcrString(rawLine);
     const fl25 = fixedLine.match(/CN[A-Z0-9]{23}/);
     if (fl25) { console.log('[6단계-줄보정25]', fl25[0]); return fl25[0]; }
+    const fl14 = fixedLine.match(/CN[A-Z0-9]{12}/);
+    if (fl14) { console.log('[6단계-줄보정14]', fl14[0]); return fl14[0]; }
     const fl10 = fixedLine.match(/CN[A-Z0-9]{8}/);
     if (fl10) { console.log('[6단계-줄보정10]', fl10[0]); return fl10[0]; }
   }
@@ -1960,12 +2488,75 @@ function extractCNSerial(ocrText) {
   return null;
 }
 
+// ========== 바코드/QR 코드 감지 (최우선) ==========
+async function tryBarcodeDetection(file) {
+  try {
+    console.log('[바코드] 바코드/QR 코드 감지 시도...');
+    const html5Qrcode = new Html5Qrcode("barcodeReader", { verbose: false });
+
+    // scanFileV2로 바코드 포맷 정보까지 가져오기
+    const result = await html5Qrcode.scanFileV2(file, /* showImage= */ false);
+    const decoded = result.decodedText;
+    const format = result.result && result.result.format ? result.result.format.formatName : 'unknown';
+    console.log(`[바코드] 감지 성공 (${format}): ${decoded}`);
+
+    html5Qrcode.clear();
+
+    // 디코딩된 텍스트에서 CN 시리얼 추출 시도
+    const upper = decoded.toUpperCase().replace(/[\s\-]/g, '');
+
+    // CN으로 시작하는 25/14/10자리 시리얼 직접 매칭
+    const m25 = upper.match(/CN[A-Z0-9]{23}/);
+    if (m25) { console.log(`[바코드] CN 25자리 시리얼 발견: ${m25[0]}`); return m25[0]; }
+    const m14 = upper.match(/CN[A-Z0-9]{12}/);
+    if (m14) { console.log(`[바코드] CN 14자리 시리얼 발견: ${m14[0]}`); return m14[0]; }
+    const m10 = upper.match(/CN[A-Z0-9]{8}/);
+    if (m10) { console.log(`[바코드] CN 10자리 시리얼 발견: ${m10[0]}`); return m10[0]; }
+
+    // CN이 포함되어 있지만 정확한 포맷이 아닌 경우, 보정 시도
+    if (upper.includes('CN')) {
+      const fixed = fixOcrString(upper);
+      const fm25 = fixed.match(/CN[A-Z0-9]{23}/);
+      if (fm25) { console.log(`[바코드] CN 25자리(보정): ${fm25[0]}`); return fm25[0]; }
+      const fm14 = fixed.match(/CN[A-Z0-9]{12}/);
+      if (fm14) { console.log(`[바코드] CN 14자리(보정): ${fm14[0]}`); return fm14[0]; }
+      const fm10 = fixed.match(/CN[A-Z0-9]{8}/);
+      if (fm10) { console.log(`[바코드] CN 10자리(보정): ${fm10[0]}`); return fm10[0]; }
+    }
+
+    // 바코드는 인식됐지만 CN 시리얼이 아닌 경우
+    console.log(`[바코드] 바코드 인식됐으나 CN 시리얼 아님: ${decoded}`);
+    return null;
+  } catch (err) {
+    // 바코드를 찾지 못한 경우 (정상적 상황)
+    console.log('[바코드] 바코드/QR 코드 감지 실패 (이미지에 바코드 없음 또는 인식 불가)');
+    return null;
+  }
+}
+
 // 공통 OCR 처리 함수 — 강화된 다단계 파이프라인 (기울기 보정 포함)
 async function processImageFile(file) {
   const status = document.getElementById('ocrStatus');
   status.textContent = '📷 이미지 분석 중...';
 
+  // 초기화
+  lastBarcodeSerial = null;
+  lastOcrSerial = null;
+
   try {
+    // ===== 1단계: 바코드/QR 코드 감지 시도 (최우선) =====
+    status.textContent = '🔎 바코드/QR 코드 감지 중...';
+    const barcodeSerial = await tryBarcodeDetection(file);
+    if (barcodeSerial) {
+      lastBarcodeSerial = barcodeSerial;
+      console.log(`[바코드] 결과 저장: ${barcodeSerial}`);
+    }
+
+    // ===== 2단계: OCR 파이프라인 (바코드 성공 여부와 무관하게 항상 실행 — 이미지 프리뷰용) =====
+    status.textContent = barcodeSerial
+      ? `✅ 바코드 인식: ${barcodeSerial} — 문자 인식도 진행 중...`
+      : '🔍 텍스트 인식 준비 중...';
+
     const img = await loadImage(file);
     const canvas = document.getElementById('ocrCanvas');
     const ctx = canvas.getContext('2d');
@@ -1992,18 +2583,24 @@ async function processImageFile(file) {
     const allAttempts = [...basicAttempts, ...rotationAttempts];
     const totalSteps = allAttempts.length;
 
+    // 바코드가 이미 성공한 경우 OCR은 이미지 프리뷰용으로 기본 시도만
+    const ocrAttempts = barcodeSerial ? basicAttempts.slice(0, 3) : allAttempts;
+    const ocrTotalSteps = ocrAttempts.length;
+
     let foundSerial = null;
     let attemptNum = 0;
 
-    for (const attempt of allAttempts) {
+    for (const attempt of ocrAttempts) {
       attemptNum++;
-      const label = `[${attemptNum}/${totalSteps}] ${attempt.name}`;
+      const label = `[${attemptNum}/${ocrTotalSteps}] ${attempt.name}`;
       console.log(`[OCR 시도] ${label}`);
 
       if (attemptNum <= basicAttempts.length) {
-        status.textContent = attemptNum === 1
-          ? '🔍 텍스트 인식 중... (최초 로딩 시 시간이 걸릴 수 있습니다)'
-          : `🔍 ${attempt.name} 분석 중... (${attemptNum}/${basicAttempts.length})`;
+        status.textContent = barcodeSerial
+          ? `✅ 바코드: ${barcodeSerial} — 이미지 분석 중...`
+          : (attemptNum === 1
+            ? '🔍 텍스트 인식 중... (최초 로딩 시 시간이 걸릴 수 있습니다)'
+            : `🔍 ${attempt.name} 분석 중... (${attemptNum}/${basicAttempts.length})`);
       } else {
         status.textContent = `🔄 기울기 보정 시도 중... (${attempt.name})`;
       }
@@ -2024,6 +2621,8 @@ async function processImageFile(file) {
 
       if (foundSerial) {
         console.log(`[OCR 성공] ${label} → ${foundSerial}`);
+        lastOcrData = data; // 바운딩박스 정보 저장
+        lastOcrCanvas = canvas;
         break;
       }
 
@@ -2034,12 +2633,37 @@ async function processImageFile(file) {
     }
 
     // ===== 결과 처리 =====
+    // OCR 결과 저장
     if (foundSerial) {
-      document.getElementById('serialInput').value = foundSerial;
-      status.textContent = `✅ 인식 완료: ${foundSerial}`;
-      const result = parseSerial(foundSerial);
-      showResult(result, true); // OCR — 애매한 문자 선택 UI 표시
+      lastOcrSerial = foundSerial;
+      lastOcrImageDataUrl = buildCroppedSerialPreview(canvas, lastOcrData, foundSerial);
     } else {
+      lastOcrSerial = null;
+      lastOcrImageDataUrl = null;
+    }
+
+    // 최종 시리얼 결정: 바코드 우선, 없으면 OCR
+    const finalSerial = lastBarcodeSerial || foundSerial;
+
+    if (finalSerial) {
+      // 바코드 결과가 있으면 해당 시리얼로 이미지 프리뷰 재생성
+      if (lastBarcodeSerial && lastOcrData && lastBarcodeSerial !== foundSerial) {
+        lastOcrImageDataUrl = buildCroppedSerialPreview(canvas, lastOcrData, lastBarcodeSerial);
+      }
+
+      document.getElementById('serialInput').value = finalSerial;
+      if (lastBarcodeSerial) {
+        status.textContent = `✅ 바코드 인식 완료: ${finalSerial}` + (foundSerial && foundSerial !== lastBarcodeSerial ? ` (문자: ${foundSerial})` : '');
+      } else {
+        status.textContent = `✅ 인식 완료: ${finalSerial}`;
+      }
+      const result = parseSerial(finalSerial);
+      // 바코드 결과 사용 시에는 정확하므로 isFromOCR=false (애매한 문자 선택 불필요)
+      // 하지만 이미지 프리뷰를 보여주기 위해 isFromOCR=true 유지 (이미지가 있으면)
+      const isOcrMode = !lastBarcodeSerial;
+      showResult(result, isOcrMode);
+    } else {
+      lastOcrImageDataUrl = null;
       status.textContent = '⚠️ CN 시리얼을 인식하지 못했습니다. 직접 입력해주세요.';
     }
   } catch (err) {
