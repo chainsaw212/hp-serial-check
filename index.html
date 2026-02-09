@@ -1211,12 +1211,12 @@
     <!-- 가이드 박스 — JS에서 크기 설정 -->
     <div class="guide-box" id="guideBox">
       <div class="guide-centerline"></div>
-      <div class="guide-inner-text">CN XXXXXXXXXX</div>
+      <div class="guide-inner-text">라벨 전체를 맞춰주세요</div>
       <div class="guide-corner-bl"></div>
       <div class="guide-corner-br"></div>
     </div>
-    <div class="guide-text-top" id="guideTextTop">시리얼 번호를 박스 안에 맞춰주세요</div>
-    <div class="guide-text-hint" id="guideTextHint">📏 가로로 수평 · 박스에 꽉 차게 · 흔들리지 않게</div>
+    <div class="guide-text-top" id="guideTextTop">바코드 + 시리얼 번호를 박스 안에 맞춰주세요</div>
+    <div class="guide-text-hint" id="guideTextHint">📏 라벨 전체가 보이도록 · 흔들리지 않게</div>
     <div class="flash-effect" id="flashEffect"></div>
   </div>
   <div class="camera-controls">
@@ -1972,14 +1972,14 @@ function updateGuideBox() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
-  // 가이드 박스: 화면 가로 92%, 세로는 얇게 (시리얼 한 줄에 맞춤)
+  // 가이드 박스: 바코드 + 시리얼 텍스트 라벨 전체를 포함할 수 있는 크기
   const boxW = Math.min(vw * 0.92, 600);
-  const boxH = Math.max(boxW * 0.10, 44);  // 가로 대비 약 10% 높이 → 가로로 긴 직사각형
+  const boxH = Math.max(boxW * 0.55, 160);  // 가로 대비 약 55% 높이 → 라벨 전체 포함
 
   guideBox.style.width = boxW + 'px';
   guideBox.style.height = boxH + 'px';
 
-  // 가이드 텍스트 위치 — 박스가 얇으므로 간격 조정
+  // 가이드 텍스트 위치
   const guideTextTop = document.getElementById('guideTextTop');
   const guideTextHint = document.getElementById('guideTextHint');
   guideTextTop.style.bottom = `calc(50% + ${boxH / 2 + 20}px)`;
@@ -2042,9 +2042,9 @@ async function capturePhoto() {
   const scaleX = vw / renderW;
   const scaleY = vh / renderH;
 
-  // 여유분 추가 (위아래 60%, 좌우 5%) — 얇은 가이드 박스에 맞게 위아래 넉넉히
+  // 여유분 추가 (위아래 15%, 좌우 5%) — 큰 가이드 박스에 맞게 약간의 여유만
   const marginX = boxRect.width * 0.05;
-  const marginY = boxRect.height * 0.6;
+  const marginY = boxRect.height * 0.15;
 
   let cropX = (boxRect.left - overlayRect.left + offsetX - marginX) * scaleX;
   let cropY = (boxRect.top - overlayRect.top + offsetY - marginY) * scaleY;
