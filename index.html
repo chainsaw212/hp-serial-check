@@ -1234,7 +1234,7 @@
 </div>
 
 <div class="bottom-spacer"></div>
-<div class="footer">Made by <span>KSH</span><br><span style="font-size:10px;color:#c0c0c0;">v 0.10</span></div>
+<div class="footer">Made by <span>KSH</span><br><span style="font-size:10px;color:#c0c0c0;">v 0.11</span></div>
 
 <!-- 바코드/QR 코드 리더 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -1459,8 +1459,10 @@ function buildCroppedSerialPreview(srcCanvas, ocrData, serial) {
     else                  { ymdStart = 0; ymdEnd = sLen; }
 
     // Tesseract words에서 시리얼이 포함된 줄의 바운딩박스 찾기
+    // 시리얼 텍스트만 크롭 (바코드, 라벨 제외)
     let bestLine = null;
     let bestSymbols = null;
+    let serialWordBbox = null;  // 시리얼 단어 자체의 바운딩박스
 
     if (ocrData && ocrData.lines) {
       for (const line of ocrData.lines) {
@@ -1470,6 +1472,11 @@ function buildCroppedSerialPreview(srcCanvas, ocrData, serial) {
           // 심볼 레벨 바운딩 박스 수집 (글자 하나하나)
           const symbols = [];
           for (const word of line.words) {
+            // 시리얼이 포함된 단어의 바운딩박스 찾기
+            const wordClean = word.text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+            if (wordClean.includes(serial.slice(0, 6))) {
+              serialWordBbox = word.bbox;
+            }
             for (const sym of (word.symbols || [])) {
               symbols.push(sym);
             }
@@ -1483,15 +1490,19 @@ function buildCroppedSerialPreview(srcCanvas, ocrData, serial) {
     const cW = srcCanvas.width;
     const cH = srcCanvas.height;
 
-    // 크롭 영역 결정
+    // 크롭 영역 결정 — 시리얼 텍스트만 타이트하게 (바코드 제외)
     let cropX, cropY, cropW, cropH;
-    if (bestLine) {
-      const lineH = bestLine.y1 - bestLine.y0;
-      const lineW = bestLine.x1 - bestLine.x0;
-      const padY = Math.round(lineH * 0.6);            // 상하 여백
-      const padX = Math.round(Math.max(lineW * 0.15, lineH * 1.0)); // 좌우 여백 넉넉하게
-      cropX = Math.max(0, bestLine.x0 - padX);
-      cropY = Math.max(0, bestLine.y0 - padY);
+    
+    // 우선: 시리얼 단어의 바운딩박스가 있으면 그것 기준
+    const refBox = serialWordBbox || bestLine;
+    
+    if (refBox) {
+      const lineH = refBox.y1 - refBox.y0;
+      const lineW = refBox.x1 - refBox.x0;
+      const padY = Math.round(lineH * 0.5);            // 상하 여백 (텍스트 높이의 50%)
+      const padX = Math.round(lineW * 0.08);            // 좌우 여백 (텍스트 폭의 8%)
+      cropX = Math.max(0, refBox.x0 - padX);
+      cropY = Math.max(0, refBox.y0 - padY);
       cropW = Math.min(cW - cropX, lineW + padX * 2);
       cropH = Math.min(cH - cropY, lineH + padY * 2);
     } else {
@@ -1539,8 +1550,8 @@ function buildCroppedSerialPreview(srcCanvas, ocrData, serial) {
 
     // 심볼 매칭 실패 시 비율로 추정
     if (ulX0 === undefined) {
-      const lineLeft = bestLine ? bestLine.x0 - cropX : 0;
-      const lineWidth = bestLine ? (bestLine.x1 - bestLine.x0) : cropW;
+      const lineLeft = refBox ? refBox.x0 - cropX : 0;
+      const lineWidth = refBox ? (refBox.x1 - refBox.x0) : cropW;
       const charWidth = lineWidth / sLen;
       ulX0 = lineLeft + charWidth * ymdStart;
       ulX1 = lineLeft + charWidth * ymdEnd;
@@ -1559,7 +1570,7 @@ function buildCroppedSerialPreview(srcCanvas, ocrData, serial) {
 
     // 반투명 배경 하이라이트 (밑줄 위)
     cropCtx.fillStyle = 'rgba(220, 38, 38, 0.10)';
-    const hlTop = bestLine ? (bestLine.y0 - cropY) : 0;
+    const hlTop = refBox ? (refBox.y0 - cropY) : 0;
     cropCtx.fillRect(ulX0, hlTop, ulX1 - ulX0, ulY + 2 - hlTop);
 
     return cropCanvas.toDataURL('image/jpeg', 0.9);
@@ -2579,8 +2590,36 @@ async function tryBarcodeDetection(file) {
       }
     }
 
-    // 3차: 이미지 스케일 업 후 재시도 (작은 바코드인 경우)
-    console.log('[바코드] 크롭 실패 → 스케일업 재시도...');
+    // 3차: 이미지 전처리(그레이스케일+대비강화+이진화) 후 재시도
+    console.log('[바코드] 크롭 실패 → 전처리 후 재시도...');
+    const preprocessModes = [
+      { name: '대비강화', process: (cv, cx) => { const id = cx.getImageData(0,0,cv.width,cv.height); toGrayscale(id); enhanceContrast(id, 0.7); cx.putImageData(id,0,0); } },
+      { name: '이진화', process: (cv, cx) => { const id = cx.getImageData(0,0,cv.width,cv.height); toGrayscale(id); otsuBinarize(id); cx.putImageData(id,0,0); } },
+      { name: '샤프닝+대비', process: (cv, cx) => { sharpen(cv, cx, 1.5); const id = cx.getImageData(0,0,cv.width,cv.height); toGrayscale(id); enhanceContrast(id, 0.6); cx.putImageData(id,0,0); } },
+    ];
+
+    for (const mode of preprocessModes) {
+      try {
+        const ppCanvas = document.createElement('canvas');
+        ppCanvas.width = iw;
+        ppCanvas.height = ih;
+        const ppCtx = ppCanvas.getContext('2d');
+        ppCtx.drawImage(img, 0, 0);
+        mode.process(ppCanvas, ppCtx);
+        const ppBlob = await new Promise(r => ppCanvas.toBlob(r, 'image/jpeg', 0.95));
+        if (ppBlob) {
+          const ppFile = new File([ppBlob], 'pp.jpg', { type: 'image/jpeg' });
+          serial = await scanBarcodeFromFile(ppFile);
+          if (serial) {
+            console.log(`[바코드] 전처리 "${mode.name}"에서 인식 성공: ${serial}`);
+            return serial;
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 4차: 이미지 스케일 업 후 재시도 (작은 바코드인 경우)
+    console.log('[바코드] 전처리 실패 → 스케일업 재시도...');
     try {
       const scaleCanvas = document.createElement('canvas');
       const scale = Math.min(2, 2000 / Math.max(iw, ih));
@@ -2611,16 +2650,49 @@ async function tryBarcodeDetection(file) {
   }
 }
 
-// 단일 파일에서 바코드 스캔
+// 바코드 디코딩 원본 텍스트 저장 (CN이 아닌 경우에도)
+let lastBarcodeRawText = null;
+
+// 단일 파일에서 바코드 스캔 (모든 1D/2D 포맷 지원)
 async function scanBarcodeFromFile(file) {
   try {
-    const html5Qrcode = new Html5Qrcode("barcodeReader", { verbose: false });
+    // 지원 바코드 포맷 명시 — QR, Data Matrix, Code128, Code39 등 모두 포함
+    const formatsToSupport = [
+      Html5QrcodeSupportedFormats.QR_CODE,
+      Html5QrcodeSupportedFormats.DATA_MATRIX,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.CODE_93,
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.UPC_E,
+      Html5QrcodeSupportedFormats.ITF,
+      Html5QrcodeSupportedFormats.AZTEC,
+      Html5QrcodeSupportedFormats.PDF_417,
+    ];
+
+    const html5Qrcode = new Html5Qrcode("barcodeReader", {
+      formatsToSupport: formatsToSupport,
+      verbose: false
+    });
+
     const result = await html5Qrcode.scanFileV2(file, /* showImage= */ false);
     const decoded = result.decodedText;
     const format = result.result && result.result.format ? result.result.format.formatName : 'unknown';
     console.log(`[바코드] 감지 성공 (${format}): ${decoded}`);
-    html5Qrcode.clear();
-    return extractCNFromBarcode(decoded);
+    
+    // 원본 디코딩 텍스트 저장
+    lastBarcodeRawText = decoded;
+    
+    try { html5Qrcode.clear(); } catch(e) {}
+    
+    const cnSerial = extractCNFromBarcode(decoded);
+    if (cnSerial) return cnSerial;
+    
+    // CN 시리얼은 아니지만 바코드 자체는 인식됨 — 로그 출력
+    console.log(`[바코드] CN 시리얼 아님, 원본: "${decoded}" (${format})`);
+    return null;
   } catch (err) {
     return null;
   }
@@ -2634,6 +2706,7 @@ async function processImageFile(file) {
   // 초기화
   lastBarcodeSerial = null;
   lastOcrSerial = null;
+  lastBarcodeRawText = null;
 
   try {
     // ===== 1단계: 바코드/QR 코드 감지 시도 (최우선) =====
@@ -2642,12 +2715,18 @@ async function processImageFile(file) {
     if (barcodeSerial) {
       lastBarcodeSerial = barcodeSerial;
       console.log(`[바코드] 결과 저장: ${barcodeSerial}`);
+    } else if (lastBarcodeRawText) {
+      console.log(`[바코드] 바코드 인식됨, CN 아님: "${lastBarcodeRawText}"`);
     }
 
-    // ===== 2단계: OCR 파이프라인 (바코드 성공 여부와 무관하게 항상 실행 — 이미지 프리뷰용) =====
+    // ===== 2단계: OCR — 이미지 프리뷰(시리얼 문자열 크롭+강조)를 위해 항상 실행 =====
+    // 바코드 성공 시: 최소 시도(3회)로 이미지 프리뷰만 생성
+    // 바코드 실패 시: 전체 파이프라인으로 시리얼 인식
     status.textContent = barcodeSerial
-      ? `✅ 바코드 인식: ${barcodeSerial} — 문자 인식도 진행 중...`
-      : '🔍 텍스트 인식 준비 중...';
+      ? `✅ 바코드: ${barcodeSerial} — 이미지 분석 중...`
+      : (lastBarcodeRawText
+        ? `📦 바코드 감지(CN 아님) — 문자 인식 진행 중...`
+        : '🔍 텍스트 인식 준비 중...');
 
     const img = await loadImage(file);
     const canvas = document.getElementById('ocrCanvas');
@@ -2673,9 +2752,8 @@ async function processImageFile(file) {
     }));
 
     const allAttempts = [...basicAttempts, ...rotationAttempts];
-    const totalSteps = allAttempts.length;
 
-    // 바코드가 이미 성공한 경우 OCR은 이미지 프리뷰용으로 기본 시도만
+    // 바코드 성공 시 이미지 프리뷰용 최소 OCR(3회), 실패 시 전체 파이프라인
     const ocrAttempts = barcodeSerial ? basicAttempts.slice(0, 3) : allAttempts;
     const ocrTotalSteps = ocrAttempts.length;
 
@@ -2687,12 +2765,12 @@ async function processImageFile(file) {
       const label = `[${attemptNum}/${ocrTotalSteps}] ${attempt.name}`;
       console.log(`[OCR 시도] ${label}`);
 
-      if (attemptNum <= basicAttempts.length) {
-        status.textContent = barcodeSerial
-          ? `✅ 바코드: ${barcodeSerial} — 이미지 분석 중...`
-          : (attemptNum === 1
-            ? '🔍 텍스트 인식 중... (최초 로딩 시 시간이 걸릴 수 있습니다)'
-            : `🔍 ${attempt.name} 분석 중... (${attemptNum}/${basicAttempts.length})`);
+      if (barcodeSerial) {
+        status.textContent = `✅ 바코드: ${barcodeSerial} — 이미지 분석 중...`;
+      } else if (attemptNum <= basicAttempts.length) {
+        status.textContent = attemptNum === 1
+          ? '🔍 텍스트 인식 중... (최초 로딩 시 시간이 걸릴 수 있습니다)'
+          : `🔍 ${attempt.name} 분석 중... (${attemptNum}/${basicAttempts.length})`;
       } else {
         status.textContent = `🔄 기울기 보정 시도 중... (${attempt.name})`;
       }
@@ -2703,7 +2781,9 @@ async function processImageFile(file) {
         logger: m => {
           if (m.status === 'recognizing text') {
             const pct = Math.round((m.progress || 0) * 100);
-            status.textContent = `🔍 텍스트 인식 중... ${pct}%`;
+            status.textContent = barcodeSerial
+              ? `✅ 바코드: ${barcodeSerial} — 이미지 분석 ${pct}%`
+              : `🔍 텍스트 인식 중... ${pct}%`;
           }
         }
       } : {};
@@ -2713,47 +2793,40 @@ async function processImageFile(file) {
 
       if (foundSerial) {
         console.log(`[OCR 성공] ${label} → ${foundSerial}`);
-        lastOcrData = data; // 바운딩박스 정보 저장
+        lastOcrData = data;
         lastOcrCanvas = canvas;
         break;
       }
 
-      // 기본 파이프라인 모두 실패 후 회전 시도 전 안내
-      if (attemptNum === basicAttempts.length && !foundSerial) {
+      if (!barcodeSerial && attemptNum === basicAttempts.length && !foundSerial) {
         console.log('[OCR] 기본 파이프라인 실패, 회전 보정 시작...');
       }
     }
 
     // ===== 결과 처리 =====
-    // OCR 결과 저장
+    // 최종 시리얼 결정: 바코드 최우선, 없으면 OCR
+    const finalSerial = barcodeSerial || foundSerial;
+
+    // OCR 결과 저장 (이미지 프리뷰용)
     if (foundSerial) {
-      lastOcrSerial = foundSerial;
-      lastOcrImageDataUrl = buildCroppedSerialPreview(canvas, lastOcrData, foundSerial);
+      lastOcrSerial = barcodeSerial ? null : foundSerial; // 바코드 있으면 OCR 결과는 표시 안 함
+      // 이미지 프리뷰는 항상 finalSerial 기준으로 생성 (바코드 시리얼로 강조)
+      lastOcrImageDataUrl = buildCroppedSerialPreview(canvas, lastOcrData, finalSerial);
     } else {
       lastOcrSerial = null;
       lastOcrImageDataUrl = null;
     }
 
-    // 최종 시리얼 결정: 바코드 우선, 없으면 OCR
-    const finalSerial = lastBarcodeSerial || foundSerial;
-
     if (finalSerial) {
-      // 바코드 결과가 있으면 해당 시리얼로 이미지 프리뷰 재생성
-      if (lastBarcodeSerial && lastOcrData && lastBarcodeSerial !== foundSerial) {
-        lastOcrImageDataUrl = buildCroppedSerialPreview(canvas, lastOcrData, lastBarcodeSerial);
-      }
-
       document.getElementById('serialInput').value = finalSerial;
-      if (lastBarcodeSerial) {
-        status.textContent = `✅ 바코드 인식 완료: ${finalSerial}` + (foundSerial && foundSerial !== lastBarcodeSerial ? ` (문자: ${foundSerial})` : '');
+      if (barcodeSerial) {
+        status.textContent = `✅ 바코드 인식 완료: ${finalSerial}`;
       } else {
         status.textContent = `✅ 인식 완료: ${finalSerial}`;
       }
       const result = parseSerial(finalSerial);
-      // 바코드 결과 사용 시에는 정확하므로 isFromOCR=false (애매한 문자 선택 불필요)
-      // 하지만 이미지 프리뷰를 보여주기 위해 isFromOCR=true 유지 (이미지가 있으면)
-      const isOcrMode = !lastBarcodeSerial;
-      showResult(result, isOcrMode);
+      // 바코드 성공 시: 정확하므로 애매한 문자 선택 불필요, 하지만 이미지 프리뷰는 표시
+      showResult(result, !barcodeSerial);
     } else {
       lastOcrImageDataUrl = null;
       status.textContent = '⚠️ CN 시리얼을 인식하지 못했습니다. 직접 입력해주세요.';
