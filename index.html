@@ -1002,6 +1002,31 @@
     transform: translate(-50%, -50%) scale(1);
   }
 
+  /* 터치 포커스 원 */
+  .focus-ring {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    border: 2.5px solid #fff;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 25;
+    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 0;
+    transition: none;
+  }
+  .focus-ring.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.3);
+    animation: focusPulse 0.8s ease-out forwards;
+  }
+  @keyframes focusPulse {
+    0%   { transform: translate(-50%, -50%) scale(1.3); opacity: 1; border-color: #fff; }
+    40%  { transform: translate(-50%, -50%) scale(0.9); opacity: 1; border-color: #0096D6; }
+    60%  { transform: translate(-50%, -50%) scale(1.0); opacity: 1; border-color: #0096D6; }
+    100% { transform: translate(-50%, -50%) scale(1.0); opacity: 0; border-color: #0096D6; }
+  }
+
   /* 하단 여백 */
   .bottom-spacer { height: 40px; }
 
@@ -1432,6 +1457,7 @@
     <div class="guide-text-hint2" id="guideTextHint2">💡 바코드/QR 포함 시 인식률이 더 좋습니다</div>
     <div class="flash-effect" id="flashEffect"></div>
     <div class="scan-success-popup" id="scanSuccessPopup"></div>
+    <div class="focus-ring" id="focusRing"></div>
   </div>
   <!-- 좌측 상단 닫기 -->
   <button class="close-camera-btn-top" onclick="closeCamera()">✕</button>
@@ -1459,7 +1485,7 @@
 </div>
 
 <div class="bottom-spacer"></div>
-<div class="footer">Made by <span>KSH</span><br><span style="font-size:10px;color:#c0c0c0;">v 0.13</span></div>
+<div class="footer">Made by <span>KSH</span><br><span style="font-size:10px;color:#c0c0c0;">v 0.14</span></div>
 
 <!-- 바코드/QR 코드 리더 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -1683,32 +1709,51 @@ function buildCroppedSerialPreview(srcCanvas, ocrData, serial) {
     else if (sLen === 25) { ymdStart = 18; ymdEnd = 21; }
     else                  { ymdStart = 0; ymdEnd = sLen; }
 
-    // Tesseract words에서 시리얼이 포함된 줄의 바운딩박스 찾기
-    // 시리얼 텍스트만 크롭 (바코드, 라벨 제외)
+    // Tesseract words에서 시리얼이 포함된 줄/단어의 바운딩박스 찾기
+    // 핵심: 바코드 영역이 아닌 실제 텍스트 영역을 찾아야 함
     let bestLine = null;
     let bestSymbols = null;
-    let serialWordBbox = null;  // 시리얼 단어 자체의 바운딩박스
+    let serialWordBbox = null;
 
     if (ocrData && ocrData.lines) {
+      // 시리얼이 포함된 모든 후보 수집
+      const candidates = [];
       for (const line of ocrData.lines) {
         const lineText = line.text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
         if (lineText.includes(serial.slice(0, 6))) {
-          bestLine = line.bbox;
-          // 심볼 레벨 바운딩 박스 수집 (글자 하나하나)
+          const bbox = line.bbox;
+          const w = bbox.x1 - bbox.x0;
+          const h = bbox.y1 - bbox.y0;
+          const aspect = h > 0 ? w / h : 0;
+
+          // 단어 레벨에서도 시리얼 포함 단어 찾기
+          let wordBbox = null;
           const symbols = [];
           for (const word of line.words) {
-            // 시리얼이 포함된 단어의 바운딩박스 찾기
             const wordClean = word.text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
             if (wordClean.includes(serial.slice(0, 6))) {
-              serialWordBbox = word.bbox;
+              wordBbox = word.bbox;
             }
             for (const sym of (word.symbols || [])) {
               symbols.push(sym);
             }
           }
-          bestSymbols = symbols;
-          break;
+
+          candidates.push({ line, bbox, wordBbox, symbols, aspect });
         }
+      }
+
+      if (candidates.length > 0) {
+        // 가로세로 비율이 가장 높은 것 선택 (텍스트는 가로로 길고, 바코드는 정사각형에 가까움)
+        // aspect > 2 이면 확실한 텍스트, aspect < 2 이면 바코드일 가능성
+        candidates.sort((a, b) => b.aspect - a.aspect);
+
+        // 텍스트다운 후보 우선 (aspect >= 2), 없으면 가장 큰 aspect 선택
+        const textCandidate = candidates.find(c => c.aspect >= 2) || candidates[0];
+
+        bestLine = textCandidate.bbox;
+        bestSymbols = textCandidate.symbols;
+        serialWordBbox = textCandidate.wordBbox;
       }
     }
 
@@ -2184,7 +2229,9 @@ async function openCamera() {
       video: {
         facingMode: { ideal: 'environment' },
         width: { ideal: 1920 },
-        height: { ideal: 1080 }
+        height: { ideal: 1080 },
+        // 연속 오토포커스 요청
+        focusMode: { ideal: 'continuous' },
       },
       audio: false
     });
@@ -2193,9 +2240,46 @@ async function openCamera() {
     video.srcObject = stream;
     await video.play();
 
+    // 트랙에서 고급 포커스 설정 적용
+    const track = stream.getVideoTracks()[0];
+    try {
+      const caps = track.getCapabilities();
+      const settings = {};
+
+      // 연속 오토포커스 강제 적용
+      if (caps.focusMode && caps.focusMode.includes('continuous')) {
+        settings.focusMode = 'continuous';
+      } else if (caps.focusMode && caps.focusMode.includes('single-shot')) {
+        settings.focusMode = 'single-shot';
+      }
+
+      // 근접 촬영 최적화: 포커스 거리를 가까이 (라벨 촬영용)
+      if (caps.focusDistance) {
+        // 최소 포커스 거리와 가까운 값 (약 10~30cm 거리)
+        const nearFocus = Math.max(caps.focusDistance.min, 0.1);
+        settings.focusDistance = nearFocus;
+        console.log(`[카메라] 포커스 거리 범위: ${caps.focusDistance.min} ~ ${caps.focusDistance.max}, 설정: ${nearFocus}`);
+      }
+
+      // 자동 화이트밸런스
+      if (caps.whiteBalanceMode && caps.whiteBalanceMode.includes('continuous')) {
+        settings.whiteBalanceMode = 'continuous';
+      }
+
+      if (Object.keys(settings).length > 0) {
+        await track.applyConstraints({ advanced: [settings] });
+        console.log('[카메라] 고급 설정 적용:', settings);
+      }
+    } catch (focusErr) {
+      console.warn('[카메라] 고급 포커스 설정 실패 (일부 브라우저 미지원):', focusErr.message);
+    }
+
     overlay.classList.add('active');
     updateGuideBox();
     window.addEventListener('resize', updateGuideBox);
+
+    // 터치 포커스 이벤트 등록
+    overlay.addEventListener('touchstart', handleTouchFocus, { passive: true });
 
     // 레이저 스캔 효과 시작
     const laser = document.getElementById('scanLaser');
@@ -2272,6 +2356,65 @@ function closeCamera() {
   }
   video.srcObject = null;
   window.removeEventListener('resize', updateGuideBox);
+  overlay.removeEventListener('touchstart', handleTouchFocus);
+}
+
+// ===== 터치 포커스 =====
+function handleTouchFocus(e) {
+  if (!cameraStream) return;
+  const touch = e.touches[0];
+  if (!touch) return;
+
+  const overlay = document.getElementById('cameraOverlay');
+  const rect = overlay.getBoundingClientRect();
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  // 포커스 원 표시
+  const ring = document.getElementById('focusRing');
+  ring.classList.remove('show');
+  ring.style.left = x + 'px';
+  ring.style.top = y + 'px';
+  // 리플로우 강제
+  void ring.offsetWidth;
+  ring.classList.add('show');
+
+  // 포커스 포인트 계산 (0~1 정규화)
+  const pointX = touch.clientX / window.innerWidth;
+  const pointY = touch.clientY / window.innerHeight;
+
+  // 카메라 트랙에 포커스 포인트 적용
+  const track = cameraStream.getVideoTracks()[0];
+  if (!track) return;
+
+  try {
+    const caps = track.getCapabilities();
+
+    // focusMode를 single-shot으로 전환하여 터치 지점에 포커스
+    if (caps.focusMode && caps.focusMode.includes('single-shot')) {
+      const constraints = { advanced: [{ focusMode: 'single-shot' }] };
+
+      // pointsOfInterest 지원 시 터치 좌표 전달
+      if (caps.pointsOfInterest) {
+        constraints.advanced[0].pointsOfInterest = [{ x: pointX, y: pointY }];
+      }
+
+      track.applyConstraints(constraints).then(() => {
+        console.log(`[터치포커스] (${pointX.toFixed(2)}, ${pointY.toFixed(2)})`);
+
+        // 1.5초 후 다시 연속 오토포커스로 전환
+        setTimeout(() => {
+          if (cameraStream && caps.focusMode && caps.focusMode.includes('continuous')) {
+            track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+          }
+        }, 1500);
+      }).catch(err => {
+        console.warn('[터치포커스] 적용 실패:', err.message);
+      });
+    }
+  } catch (err) {
+    console.warn('[터치포커스] 미지원:', err.message);
+  }
 }
 
 // ===== 자동 바코드 스캔 루프 =====

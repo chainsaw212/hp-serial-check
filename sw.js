@@ -1,5 +1,5 @@
 // HP Serial Check — Service Worker (PWA 완전 오프라인 지원)
-const CACHE_NAME = 'hp-serial-v10';
+const CACHE_NAME = 'hp-serial-v11';
 const ASSETS = [
   './',
   './index.html',
