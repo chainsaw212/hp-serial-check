@@ -727,6 +727,17 @@
     text-shadow: 0 1px 4px rgba(0,0,0,0.6);
     white-space: nowrap;
   }
+  .guide-text-hint2 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(50% + 65px);
+    color: rgba(255,220,100,0.85);
+    font-size: 11px;
+    text-align: center;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    white-space: nowrap;
+  }
 
   /* 촬영 버튼 영역 */
   .camera-controls {
@@ -791,6 +802,205 @@
     transition: opacity 0.1s;
   }
   .flash-effect.flash { opacity: 0.8; }
+
+  /* 레이저 스캔 라인 */
+  .scan-laser {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 2.5px;
+    background: linear-gradient(90deg, transparent, #ff1a1a 15%, #ff4444 50%, #ff1a1a 85%, transparent);
+    box-shadow: 0 0 12px 3px rgba(255, 30, 30, 0.6), 0 0 30px 6px rgba(255, 30, 30, 0.25);
+    border-radius: 2px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .scan-laser.active {
+    opacity: 1;
+    animation: laserSweep 2s ease-in-out infinite;
+  }
+  @keyframes laserSweep {
+    0%   { top: 8px; }
+    50%  { top: calc(100% - 10px); }
+    100% { top: 8px; }
+  }
+
+  /* 스캔 상태 텍스트 */
+  .scan-status {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .scan-status.active { opacity: 1; }
+
+  /* 수동 촬영 버튼 — 하단 중앙 */
+  .camera-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 14px);
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  /* 자동/수동 전환 토글 */
+  .scan-mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: auto;
+  }
+  .scan-mode-toggle .mode-label {
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    font-weight: 600;
+    transition: color 0.3s;
+    white-space: nowrap;
+  }
+  .scan-mode-toggle .mode-label.active {
+    color: #fff;
+  }
+  .toggle-track {
+    width: 52px;
+    height: 28px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.25);
+    border: 1.5px solid rgba(255,255,255,0.5);
+    position: relative;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: background 0.3s;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .toggle-track.manual {
+    background: rgba(0, 150, 214, 0.6);
+    border-color: rgba(0, 150, 214, 0.8);
+  }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .toggle-track.manual .toggle-thumb {
+    left: 26px;
+  }
+
+  /* 촬영 버튼 + 라벨 영역 */
+  .shutter-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    pointer-events: auto;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+  }
+  .shutter-area.visible {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+
+  .shutter-btn-new {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #fff;
+    border: 4px solid rgba(255,255,255,0.4);
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s;
+  }
+  .shutter-btn-new:active {
+    transform: scale(0.92);
+    background: #ddd;
+  }
+  .shutter-btn-new::after {
+    content: '';
+    position: absolute;
+    top: 4px; left: 4px; right: 4px; bottom: 4px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.1);
+  }
+  .shutter-label {
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+    letter-spacing: 1px;
+  }
+
+  /* 닫기 버튼 — 좌측 상단 */
+  .close-camera-btn-top {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 20px) + 12px);
+    left: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.4);
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 20;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .close-camera-btn-top:active { background: rgba(0,0,0,0.6); }
+
+  /* 자동 스캔 성공 팝업 */
+  .scan-success-popup {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background: rgba(0, 150, 60, 0.92);
+    color: #fff;
+    padding: 16px 32px;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 30;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .scan-success-popup.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 
   /* 하단 여백 */
   .bottom-spacer { height: 40px; }
@@ -1210,19 +1420,34 @@
   <div class="camera-guide-layer">
     <!-- 가이드 박스 — JS에서 크기 설정 -->
     <div class="guide-box" id="guideBox">
+      <div class="scan-laser" id="scanLaser"></div>
       <div class="guide-centerline"></div>
-      <div class="guide-inner-text">라벨 전체를 맞춰주세요</div>
+      <div class="guide-inner-text" id="guideInnerText">스캔 중...</div>
       <div class="guide-corner-bl"></div>
       <div class="guide-corner-br"></div>
     </div>
     <div class="guide-text-top" id="guideTextTop">바코드 + 시리얼 번호를 박스 안에 맞춰주세요</div>
+    <div class="scan-status" id="scanStatus">🔎 바코드 스캔 중...</div>
     <div class="guide-text-hint" id="guideTextHint">📏 라벨 전체가 보이도록 · 흔들리지 않게</div>
+    <div class="guide-text-hint2" id="guideTextHint2">💡 바코드/QR 포함 시 인식률이 더 좋습니다</div>
     <div class="flash-effect" id="flashEffect"></div>
+    <div class="scan-success-popup" id="scanSuccessPopup"></div>
   </div>
-  <div class="camera-controls">
-    <button class="close-camera-btn" onclick="closeCamera()">✕</button>
-    <button class="shutter-btn" id="shutterBtn" onclick="capturePhoto()"></button>
-    <div style="width:44px"></div><!-- 좌우 균형 맞춤 -->
+  <!-- 좌측 상단 닫기 -->
+  <button class="close-camera-btn-top" onclick="closeCamera()">✕</button>
+  <!-- 하단 바: 토글 + 촬영 버튼 -->
+  <div class="camera-bottom-bar">
+    <div class="scan-mode-toggle">
+      <span class="mode-label active" id="modeAutoLabel">자동</span>
+      <div class="toggle-track" id="scanModeToggle" onclick="toggleScanMode()">
+        <div class="toggle-thumb"></div>
+      </div>
+      <span class="mode-label" id="modeManualLabel">수동</span>
+    </div>
+    <div class="shutter-area" id="shutterArea">
+      <button class="shutter-btn-new" onclick="manualCapture()"></button>
+      <span class="shutter-label">수동 촬영</span>
+    </div>
   </div>
 </div>
 
@@ -1234,7 +1459,7 @@
 </div>
 
 <div class="bottom-spacer"></div>
-<div class="footer">Made by <span>KSH</span><br><span style="font-size:10px;color:#c0c0c0;">v 0.11</span></div>
+<div class="footer">Made by <span>KSH</span><br><span style="font-size:10px;color:#c0c0c0;">v 0.13</span></div>
 
 <!-- 바코드/QR 코드 리더 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -1942,16 +2167,19 @@ function toggleRefPanel() {
   panel.classList.toggle('open');
 }
 
-// ========== 카메라 (실시간 가이드라인) + 갤러리 + OCR ==========
+// ========== 카메라 (자동 바코드 스캔 + 수동 촬영) ==========
 
 let cameraStream = null;
+let autoScanTimer = null;
+let autoScanRunning = false;
+const AUTO_SCAN_INTERVAL = 1200; // 1.2초마다 바코드 스캔
+const AUTO_SCAN_DELAY = 1500;    // 카메라 열린 후 1.5초 대기 후 스캔 시작
 
 async function openCamera() {
   const overlay = document.getElementById('cameraOverlay');
   const video = document.getElementById('cameraVideo');
 
   try {
-    // 후면 카메라 우선
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: 'environment' },
@@ -1967,13 +2195,34 @@ async function openCamera() {
 
     overlay.classList.add('active');
     updateGuideBox();
-
-    // 화면 방향 변경 시 가이드 박스 크기 업데이트
     window.addEventListener('resize', updateGuideBox);
+
+    // 레이저 스캔 효과 시작
+    const laser = document.getElementById('scanLaser');
+    const scanStatus = document.getElementById('scanStatus');
+    const innerText = document.getElementById('guideInnerText');
+
+    // 토글 상태 자동 모드로 초기화
+    isManualMode = false;
+    document.getElementById('scanModeToggle').classList.remove('manual');
+    document.getElementById('modeAutoLabel').classList.add('active');
+    document.getElementById('modeManualLabel').classList.remove('active');
+    document.getElementById('shutterArea').classList.remove('visible');
+
+    laser.classList.add('active');
+    scanStatus.classList.add('active');
+    scanStatus.textContent = '🔎 바코드 스캔 준비 중...';
+    innerText.textContent = '스캔 중...';
+
+    // 딜레이 후 자동 스캔 시작
+    autoScanRunning = true;
+    autoScanTimer = setTimeout(() => {
+      scanStatus.textContent = '🔎 바코드 스캔 중...';
+      runAutoScanLoop();
+    }, AUTO_SCAN_DELAY);
 
   } catch (err) {
     console.warn('[카메라 직접 접근 실패]', err.message);
-    // 폴백: 기존 file input 방식
     document.getElementById('cameraInput').click();
   }
 }
@@ -1983,23 +2232,37 @@ function updateGuideBox() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
-  // 가이드 박스: 바코드 + 시리얼 텍스트 라벨 전체를 포함할 수 있는 크기
   const boxW = Math.min(vw * 0.92, 600);
-  const boxH = Math.max(boxW * 0.55, 160);  // 가로 대비 약 55% 높이 → 라벨 전체 포함
+  const boxH = Math.max(boxW * 0.55, 160);
 
   guideBox.style.width = boxW + 'px';
   guideBox.style.height = boxH + 'px';
 
-  // 가이드 텍스트 위치
   const guideTextTop = document.getElementById('guideTextTop');
   const guideTextHint = document.getElementById('guideTextHint');
+  const guideTextHint2 = document.getElementById('guideTextHint2');
+  const scanStatus = document.getElementById('scanStatus');
   guideTextTop.style.bottom = `calc(50% + ${boxH / 2 + 20}px)`;
-  guideTextHint.style.top = `calc(50% + ${boxH / 2 + 14}px)`;
+  scanStatus.style.top = `calc(50% + ${boxH / 2 + 10}px)`;
+  guideTextHint.style.top = `calc(50% + ${boxH / 2 + 34}px)`;
+  guideTextHint2.style.top = `calc(50% + ${boxH / 2 + 54}px)`;
 }
 
 function closeCamera() {
   const overlay = document.getElementById('cameraOverlay');
   const video = document.getElementById('cameraVideo');
+
+  // 자동 스캔 중지
+  autoScanRunning = false;
+  if (autoScanTimer) {
+    clearTimeout(autoScanTimer);
+    autoScanTimer = null;
+  }
+
+  // 레이저 효과 중지
+  document.getElementById('scanLaser').classList.remove('active');
+  document.getElementById('scanStatus').classList.remove('active');
+  document.getElementById('scanSuccessPopup').classList.remove('show');
 
   overlay.classList.remove('active');
 
@@ -2009,6 +2272,166 @@ function closeCamera() {
   }
   video.srcObject = null;
   window.removeEventListener('resize', updateGuideBox);
+}
+
+// ===== 자동 바코드 스캔 루프 =====
+async function runAutoScanLoop() {
+  if (!autoScanRunning || !cameraStream) return;
+
+  const scanStatus = document.getElementById('scanStatus');
+
+  try {
+    // 비디오 프레임을 캡처하여 바코드 감지 시도
+    const frameBlob = await captureVideoFrame();
+    if (!frameBlob || !autoScanRunning) return;
+
+    const frameFile = new File([frameBlob], 'scan.jpg', { type: 'image/jpeg' });
+
+    // 바코드 감지 시도
+    const barcodeSerial = await tryBarcodeDetection(frameFile);
+
+    if (barcodeSerial && autoScanRunning) {
+      // 바코드 인식 성공! → 자동 촬영
+      console.log(`[자동스캔] 바코드 인식 성공: ${barcodeSerial}`);
+      scanStatus.textContent = `✅ 바코드 인식: ${barcodeSerial}`;
+
+      // 성공 팝업 표시
+      const popup = document.getElementById('scanSuccessPopup');
+      popup.textContent = `✅ ${barcodeSerial}`;
+      popup.classList.add('show');
+
+      // 잠시 보여준 후 자동 캡처
+      await new Promise(r => setTimeout(r, 600));
+      if (autoScanRunning) {
+        await capturePhoto();  // 자동으로 사진 촬영 + 처리
+      }
+      return; // 스캔 루프 종료
+    }
+
+  } catch (err) {
+    console.warn('[자동스캔] 오류:', err.message);
+  }
+
+  // 실패 시 다음 스캔 예약
+  if (autoScanRunning) {
+    scanStatus.textContent = '🔎 바코드 스캔 중...';
+    autoScanTimer = setTimeout(runAutoScanLoop, AUTO_SCAN_INTERVAL);
+  }
+}
+
+// 비디오 프레임을 Blob으로 캡처 (가이드 박스 영역만)
+function captureVideoFrame() {
+  return new Promise((resolve) => {
+    const video = document.getElementById('cameraVideo');
+    const guideBox = document.getElementById('guideBox');
+
+    if (!video.videoWidth || !video.videoHeight) {
+      resolve(null);
+      return;
+    }
+
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    const overlayRect = document.getElementById('cameraOverlay').getBoundingClientRect();
+    const boxRect = guideBox.getBoundingClientRect();
+
+    const dispW = overlayRect.width;
+    const dispH = overlayRect.height;
+    const vidAspect = vw / vh;
+    const dispAspect = dispW / dispH;
+
+    let renderW, renderH, offsetX, offsetY;
+    if (vidAspect > dispAspect) {
+      renderH = dispH;
+      renderW = dispH * vidAspect;
+      offsetX = (renderW - dispW) / 2;
+      offsetY = 0;
+    } else {
+      renderW = dispW;
+      renderH = dispW / vidAspect;
+      offsetX = 0;
+      offsetY = (renderH - dispH) / 2;
+    }
+
+    const scaleX = vw / renderW;
+    const scaleY = vh / renderH;
+
+    let cropX = (boxRect.left - overlayRect.left + offsetX) * scaleX;
+    let cropY = (boxRect.top - overlayRect.top + offsetY) * scaleY;
+    let cropW = boxRect.width * scaleX;
+    let cropH = boxRect.height * scaleY;
+
+    cropX = Math.max(0, Math.round(cropX));
+    cropY = Math.max(0, Math.round(cropY));
+    cropW = Math.min(vw - cropX, Math.round(cropW));
+    cropH = Math.min(vh - cropY, Math.round(cropH));
+
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = cropW;
+    tempCanvas.height = cropH;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+    tempCanvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.85);
+  });
+}
+
+// ===== 수동 촬영 =====
+async function manualCapture() {
+  autoScanRunning = false;
+  if (autoScanTimer) {
+    clearTimeout(autoScanTimer);
+    autoScanTimer = null;
+  }
+  document.getElementById('scanLaser').classList.remove('active');
+  document.getElementById('scanStatus').textContent = '📸 수동 촬영...';
+  await capturePhoto();
+}
+
+// ===== 자동/수동 모드 전환 =====
+let isManualMode = false;
+
+function toggleScanMode() {
+  isManualMode = !isManualMode;
+
+  const track = document.getElementById('scanModeToggle');
+  const autoLabel = document.getElementById('modeAutoLabel');
+  const manualLabel = document.getElementById('modeManualLabel');
+  const shutterArea = document.getElementById('shutterArea');
+  const laser = document.getElementById('scanLaser');
+  const scanStatus = document.getElementById('scanStatus');
+  const innerText = document.getElementById('guideInnerText');
+
+  if (isManualMode) {
+    // 수동 모드
+    track.classList.add('manual');
+    autoLabel.classList.remove('active');
+    manualLabel.classList.add('active');
+    shutterArea.classList.add('visible');
+
+    // 자동 스캔 중지
+    autoScanRunning = false;
+    if (autoScanTimer) {
+      clearTimeout(autoScanTimer);
+      autoScanTimer = null;
+    }
+    laser.classList.remove('active');
+    scanStatus.textContent = '📸 수동 모드 — 촬영 버튼을 누르세요';
+    innerText.textContent = '라벨을 맞추고 촬영';
+  } else {
+    // 자동 모드
+    track.classList.remove('manual');
+    autoLabel.classList.add('active');
+    manualLabel.classList.remove('active');
+    shutterArea.classList.remove('visible');
+
+    // 자동 스캔 재시작
+    laser.classList.add('active');
+    scanStatus.textContent = '🔎 바코드 스캔 중...';
+    innerText.textContent = '스캔 중...';
+    autoScanRunning = true;
+    autoScanTimer = setTimeout(runAutoScanLoop, AUTO_SCAN_INTERVAL);
+  }
 }
 
 async function capturePhoto() {
